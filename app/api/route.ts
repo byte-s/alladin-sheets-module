@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
 
-    const addRow = await sheet.addRow([JSON.stringify(res.json())]);
+    const addRow = await sheet.addRow([JSON.stringify(res)]);
     if(addRow){
         return Response.json({ text:'Успех' })
     } else{
