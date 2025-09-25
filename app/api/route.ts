@@ -4,7 +4,7 @@ import creds from '../../quiet-dryad-creds.json'
 import { json } from 'stream/consumers';
 
 export async function POST(request: Request) {
-    const res = '{"text":"text"}';
+    const res = await request.json();
 
     const SCOPES = [
         'https://www.googleapis.com/auth/spreadsheets',
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
 
-    const addRow = await sheet.addRow([JSON.stringify(res)]);
+    const addRow = await sheet.addRow([res.toString()]);
     if(addRow){
         return Response.json({ text:'Успех' })
     } else{
