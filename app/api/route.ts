@@ -35,11 +35,29 @@ export async function POST(request: Request) {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
 
-    const addRow = await sheet.addRow(formDataValues);
-    if(addRow){
-        return Response.json({ text:'Успех' })
-    } else{
-return Response.json({ text:'Не успех' })
-    }
+    
+
+    fetch('https://mfalladin55.amocrm.ru/api/v4/leads/'+formDataValues[0])
+        .then(async res=>{
+            if(res.ok){
+                const resBody = await res.json();
+                let resBodyValues = [];
+                for (let vals in resBody) {
+                    if (resBody.hasOwnProperty(vals)) {
+                        resBodyValues.push(vals)
+                    }
+                }
+                const addRow = await sheet.addRow(resBody);
+
+                if(addRow){
+                    return Response.json({ text:'Успех' })
+                } else{
+                    return Response.json({ text:'Не успех' })
+                }
+            }
+        })
+
+
+    
     
 }
