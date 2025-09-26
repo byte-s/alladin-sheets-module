@@ -55,6 +55,8 @@ export async function POST(request: Request) {
                     return Response.json({ text:'Не успех' })
                 }
             }
+        }).catch(()=>{
+            return Response.json({ text:'Не успех' })
         })
 
 
