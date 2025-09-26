@@ -60,6 +60,8 @@ export async function POST(request: Request) {
                 } else{
                     return Response.json({ text:'Не успех' })
                 }
+            } else{
+                return Response.json({ text:'Не успех' })
             }
         }).catch(()=>{
             return Response.json({ text:'Не успех' })
