@@ -2,6 +2,7 @@ import {GoogleSpreadsheet} from 'google-spreadsheet';
 import { JWT } from 'google-auth-library'
 import creds from '../../quiet-dryad-creds.json'
 import { json } from 'stream/consumers';
+import { Lead, LeadFieldValue } from '@/lib/db.d';
 
 export const config = {
       api: {
@@ -45,14 +46,14 @@ export async function POST(request: Request) {
         },
     }).then(async res=>{
             if(res.ok){
-                const resBody = await res.json();
-                let resBodyValues = [];
-                for (let vals in resBody) {
-                    if (resBody.hasOwnProperty(vals)) {
-                        resBodyValues.push(vals)
-                    }
-                }
-                const addRow = await sheet.addRow(resBody);
+                const resBody:Lead = await res.json();
+                let resBodyValues:string[] = [];
+                resBody.custom_fields_values.map((a)=>{
+                    a.values.map((c)=>{
+                        resBodyValues.push(c.value);
+                    })
+                })
+                const addRow = await sheet.addRow(resBodyValues);
 
                 if(addRow){
                     return Response.json({ text:'Успех' })
