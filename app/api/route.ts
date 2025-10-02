@@ -247,65 +247,61 @@ export async function POST(request: Request) {
         }
     }
 
-    fetch('https://mfalladin55.amocrm.ru/api/v4/leads/'+formDataValues[0],{
+    const response = await fetch('https://mfalladin55.amocrm.ru/api/v4/leads/' + formDataValues[0], {
         method: "GET",
         headers: {
             "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjJkNWNhNTNkMGYzM2IxN2E0NDllNDNmOGJhMzAxNTIyYmM2MDkxOGI0ODMzOTg0MzMyODIyYzFkYWIwMmY3MzA1NjdhZTMyZWJiN2E3OTRiIn0.eyJhdWQiOiI4NTZlMmUzYy1mOWNlLTQ1MDEtYjE1Yi0zYWIyZTA0ZTczNzEiLCJqdGkiOiIyZDVjYTUzZDBmMzNiMTdhNDQ5ZTQzZjhiYTMwMTUyMmJjNjA5MThiNDgzMzk4NDMzMjgyMmMxZGFiMDJmNzMwNTY3YWUzMmViYjdhNzk0YiIsImlhdCI6MTc1ODg1MDYwMiwibmJmIjoxNzU4ODUwNjAyLCJleHAiOjE5MTY2MTEyMDAsInN1YiI6IjU5NTQyMjciLCJncmFudF90eXBlIjoiIiwiYWNjb3VudF9pZCI6Mjg4NTU2MjQsImJhc2VfZG9tYWluIjoiYW1vY3JtLnJ1IiwidmVyc2lvbiI6Miwic2NvcGVzIjpbImNybSIsImZpbGVzIiwiZmlsZXNfZGVsZXRlIiwibm90aWZpY2F0aW9ucyIsInB1c2hfbm90aWZpY2F0aW9ucyJdLCJ1c2VyX2ZsYWdzIjowLCJoYXNoX3V1aWQiOiI3OGM4YzQ3NC1mYjM2LTQ0NTktYTdiOC0yMzQ2NDlhYzY2YTMiLCJhcGlfZG9tYWluIjoiYXBpLWIuYW1vY3JtLnJ1In0.A7qhsMp8tgF8N7zrVwQJB6kKENKswo5xHOppfF7qDtFHc4uCayj148zsiC56Zd6__ZYLH_xsTmkGDqphjn-RNPVcjKQt7kEK7P3YosCOvb_R-F7x5whcCiGzA4lxY5Ip_DgDhILO7ghWTs1m1kw_jwfzaupQt74fBqZM6A1jSCXf7Okkdw5QWU-NCcSn09Ze40ReWmNCpYhMnrBi0OYQoGD0vbhiVHkaD4WPSLf_EjwSIbko6V--wsx1Aj9C-v1Fp18IPhit8nzTBox02rw7ZelcCjyw7okk1k_7wIWxq8DxBKRfOMSZH8M9SzD9JHOSTCy0nFaqmA5vpSSI0d-Iew",
             "Content-Type": "application/x-www-form-urlencoded",
         },
-    }).then(async res=>{
-            if(res.ok){
-                const resBody:Lead = await res.json();
-                let resBodyValues:string[] = [];
+    })
 
-                const username = await getUser(resBody.responsible_user_id.toString());
-                const contactname = await getContact(resBody._embedded.contacts[0].id.toString());
-                const statusname = await getStatus(resBody.status_id.toString());
-                let phoneNumber;
+    if(response.ok){
+        const resBody:Lead = await response.json();
+        let resBodyValues:string[] = [];
 
-                if(contactname != null){
-                    contactname.custom_fields_values.map((a)=>{
-                            if(a.field_code == 'PHONE'){
-                                a.values.map((c)=>{
-                                    phoneNumber = c.value;
-                                })
-                            }
+        const username = await getUser(resBody.responsible_user_id.toString());
+        const contactname = await getContact(resBody._embedded.contacts[0].id.toString());
+        const statusname = await getStatus(resBody.status_id.toString());
+        let phoneNumber;
+
+        if(contactname != null){
+            contactname.custom_fields_values.map((a)=>{
+                    if(a.field_code == 'PHONE'){
+                        a.values.map((c)=>{
+                            phoneNumber = c.value;
                         })
-                }
-                
-                tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
-                tableRow.ID = resBody.id;
-                tableRow.created_at = resBody.created_at;
-                tableRow.lead_month = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("ru-RU");
-                username ? tableRow.manager = username : tableRow.manager = '';
-                contactname ? tableRow.client_name = contactname.name : tableRow.client_name = '';
-                tableRow.lead_name = resBody.name;
-                statusname ? tableRow.status = statusname : tableRow.status = '';
-                phoneNumber ? tableRow.phone = phoneNumber : tableRow.phone = '';
-                tableRow.budget = resBody.price;
-                tableRow.sync_date = Math.floor(now.getTime() / 1000); ///исправить
-                
-
-                resBody.custom_fields_values.map((a)=>{
-                    a.values.map((c)=>{
-                        resBodyValues.push(c.value);
-                    })
+                    }
                 })
-                const addRow = await sheet.addRow(resBodyValues);
+        }
+        
+        tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
+        tableRow.ID = resBody.id;
+        tableRow.created_at = resBody.created_at;
+        tableRow.lead_month = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("ru-RU");
+        username ? tableRow.manager = username : tableRow.manager = '';
+        contactname ? tableRow.client_name = contactname.name : tableRow.client_name = '';
+        tableRow.lead_name = resBody.name;
+        statusname ? tableRow.status = statusname : tableRow.status = '';
+        phoneNumber ? tableRow.phone = phoneNumber : tableRow.phone = '';
+        tableRow.budget = resBody.price;
+        tableRow.sync_date = Math.floor(now.getTime() / 1000); ///исправить
+        
 
-                if(addRow){
-                    return Response.json({ text:'Успех' })
-                } else{
-                    return Response.json({ text:'Не успех' })
-                }
-            } else{
-                return Response.json({ text:'Не успех' })
-            }
-        }).catch(()=>{
-            return Response.json({ text:'Не успех' })
+        resBody.custom_fields_values.map((a)=>{
+            a.values.map((c)=>{
+                resBodyValues.push(c.value);
+            })
         })
+        const addRow = await sheet.addRow(resBodyValues);
 
-
+        if(addRow){
+            return Response.json({ text:'Успех' })
+        } else{
+            return Response.json({ text:'Не успех' })
+        }
+    } else{
+        return Response.json({ text:'Не успех' })
+    }
     
     
 }
