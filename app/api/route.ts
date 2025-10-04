@@ -259,9 +259,9 @@ export async function POST(request: Request) {
         const resBody:Lead = await response.json();
         let resBodyValues:string[] = [];
 
-        const username = await getUser(resBody.responsible_user_id.toString());
-        const contactname = await getContact(resBody._embedded.contacts[0].id.toString());
-        const statusname = await getStatus(resBody.status_id.toString());
+        // const username = await getUser(resBody.responsible_user_id.toString());
+        // const contactname = await getContact(resBody._embedded.contacts[0].id.toString());
+        // const statusname = await getStatus(resBody.status_id.toString());
         let phoneNumber;
 
         // if(contactname != null){
@@ -287,11 +287,11 @@ export async function POST(request: Request) {
         // tableRow.sync_date = Math.floor(now.getTime() / 1000); ///исправить
         
 
-        resBody.custom_fields_values.map((a)=>{
-            a.values.map((c)=>{
-                resBodyValues.push(c.value);
-            })
-        })
+        // resBody.custom_fields_values.map((a)=>{
+        //     a.values.map((c)=>{
+        //         resBodyValues.push(c.value);
+        //     })
+        // })
         const addRow = await sheet.addRow([tableRow.ID, tableRow.created_at]);
 
         if(addRow){
