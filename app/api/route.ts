@@ -274,10 +274,10 @@ export async function POST(request: Request) {
         //         })
         // }
         
-        //tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
+        tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
         tableRow.ID = resBody.id;
-        tableRow.created_at = resBody.created_at;
-        // tableRow.lead_month = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("ru-RU");
+        tableRow.created_at = resBody.created_at; //исправить
+        tableRow.lead_month = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("ru-RU");
         // username ? tableRow.manager = username : tableRow.manager = '';
         // contactname ? tableRow.client_name = contactname.name : tableRow.client_name = '';
         // tableRow.lead_name = resBody.name;
@@ -292,7 +292,7 @@ export async function POST(request: Request) {
         //         resBodyValues.push(c.value);
         //     })
         // })
-        const addRow = await sheet.addRow([tableRow.ID, tableRow.created_at]);
+        const addRow = await sheet.addRow([tableRow.link, tableRow.ID, tableRow.created_at, tableRow.lead_month]);
 
         if(addRow){
             return Response.json({ text:'Успех' })
