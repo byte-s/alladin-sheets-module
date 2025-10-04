@@ -102,7 +102,7 @@ export async function POST(request: Request) {
         expected_sofa_done: '',
         expected_frame_done: '',
         expected_sewing_done: '',
-        seats_quantity: 0,
+        seats_quantity: '',
         otk_accepted: '',
         remark: '',
         rise_to_floor: '',
@@ -378,7 +378,587 @@ export async function POST(request: Request) {
                         tableRow.sofa_number = c.value;
                     })
                     break;
+                case 'ФИО распил':
+                    a.values.map((c)=>{
+                        tableRow.fio_sawer = c.value;
+                    })
+                    break; 
+                case 'Дата распил':
+                    a.values.map((c)=>{
+                        tableRow.saw_date = c.value;
+                    })
+                    break;
+                case 'Распиловка':
+                    a.values.map((c)=>{
+                        tableRow.sawing = c.value;
+                    })
+                    break;
+                case 'Стоимость работы (распил)(Р)':
+                    a.values.map((c)=>{
+                        tableRow.saw_work_cost = c.value;
+                    })
+                    break;
+                case 'ФИО каркасчики':
+                    a.values.map((c)=>{
+                        tableRow.fio_framer = c.value;
+                    })
+                    break;
+                case 'Дата каркас':
+                    a.values.map((c)=>{
+                        tableRow.frame_date = c.value;
+                    })
+                    break;
+                case 'Каркас':
+                    a.values.map((c)=>{
+                        tableRow.frame = c.value;
+                    })
+                    break;
+                case 'Стоимость работы (каркас)(Р)':
+                    a.values.map((c)=>{
+                        tableRow.frame_work_cost = c.value;
+                    })
+                    break;
+                case 'ФИО закройщицы':
+                    a.values.map((c)=>{
+                        tableRow.fio_cutter = c.value;
+                    })
+                    break;
+                case 'Дата закрой':
+                    a.values.map((c)=>{
+                        tableRow.cut_date = c.value;
+                    })
+                    break;
+                case 'Закройщики':
+                    a.values.map((c)=>{
+                        tableRow.cutters = c.value;
+                    })
+                    break;
+                case 'Стоимость работы (закройщик)(Р)':
+                    a.values.map((c)=>{
+                        tableRow.cut_work_cost = c.value;
+                    })
+                    break;
+                case 'ФИО швеи':
+                    a.values.map((c)=>{
+                        tableRow.fio_sewer = c.value;
+                    })
+                    break;
+                case 'Дата швея':
+                    a.values.map((c)=>{
+                        tableRow.sewer_date = c.value;
+                    })
+                    break;
+                case 'Швеи':
+                    a.values.map((c)=>{
+                        tableRow.sewers = c.value;
+                    })
+                    break;
+                case 'Стоимость работы (швея)(Р)':
+                    a.values.map((c)=>{
+                        tableRow.sewer_work_cost = c.value;
+                    })
+                    break;
+                case 'ФИО обивщики':
+                    a.values.map((c)=>{
+                        tableRow.fio_upholsterer = c.value;
+                    })
+                    break;
+                case 'Дата обивщик':
+                    a.values.map((c)=>{
+                        tableRow.upholsterer_date = c.value;
+                    })
+                    break;
+                case 'Обивщики':
+                    a.values.map((c)=>{
+                        tableRow.upholsterers = c.value;
+                    })
+                    break;
+                case 'Стоимость работы (обивщик)(Р)':
+                    a.values.map((c)=>{
+                        tableRow.upholsterer_work_cost = c.value;
+                    })
+                    break;
+                case 'Ор-тир. дата готов.дивана':
+                    a.values.map((c)=>{
+                        tableRow.expected_sofa_done = c.value;
+                    })
+                    break;
+                case 'Ор-тир. дата готов.каркаса':
+                    a.values.map((c)=>{
+                        tableRow.expected_frame_done = c.value;
+                    })
+                    break;
+                case 'Ор-тир. дата готов.шитья':
+                    a.values.map((c)=>{
+                        tableRow.expected_sewing_done = c.value;
+                    })
+                    break;
+                case 'Кол-во мест':
+                    a.values.map((c)=>{
+                        tableRow.seats_quantity = c.value;
+                    })
+                    break;
+                case 'Принял ОТК':
+                    a.values.map((c)=>{
+                        tableRow.otk_accepted = c.value;
+                    })
+                    break;
+                case 'Примечание':
+                    a.values.map((c)=>{
+                        tableRow.remark = c.value;
+                    })
+                    break;
+                case 'Подъем на этаж':
+                    a.values.map((c)=>{
+                        tableRow.rise_to_floor = c.value;
+                    })
+                    break;
+                case 'Этаж':
+                    a.values.map((c)=>{
+                        tableRow.floor = c.value;
+                    })
+                    break;
+                case 'Стоимость подъема':
+                    a.values.map((c)=>{
+                        tableRow.rise_price = c.value;
+                    })
+                    break;
+                case 'Варианты доставки':
+                    a.values.map((c)=>{
+                        tableRow.delivery_variant = c.value;
+                    })
+                    break;
+                case 'Сумма доставки':
+                    a.values.map((c)=>{
+                        tableRow.delivery_cost = c.value;
+                    })
+                    break;
+                case 'Адрес доставки':
+                    a.values.map((c)=>{
+                        tableRow.delivery_address = c.value;
+                    })
+                    break;
+                case 'Дата доставки':
+                    a.values.map((c)=>{
+                        tableRow.delivery_date = c.value;
+                    })
+                    break;
+                case 'Дата самовывоза':
+                    a.values.map((c)=>{
+                        tableRow.pickup_date = c.value;
+                    })
+                    break;
+                case 'Водители':
+                    a.values.map((c)=>{
+                        tableRow.drivers = c.value;
+                    })
+                    break;
+                case 'Грузчики':
+                    a.values.map((c)=>{
+                        tableRow.movers = c.value;
+                    })
+                    break;
+                case 'Дата оплаты':
+                    a.values.map((c)=>{
+                        tableRow.pay_date = c.value;
+                    })
+                    break;
+                case 'Номер договора':
+                    a.values.map((c)=>{
+                        tableRow.contract_number = c.value;
+                    })
+                    break;
+                case 'Способ оплаты':
+                    a.values.map((c)=>{
+                        tableRow.payment_method = c.value;
+                    })
+                    break;
+                case 'Кредит через банк':
+                    a.values.map((c)=>{
+                        tableRow.bank_loan = c.value;
+                    })
+                    break;
+                case 'Предоплата получена':
+                    a.values.map((c)=>{
+                        tableRow.prepayment_received = c.value;
+                    })
+                    break;
+                case 'Сумма предоплаты':
+                    a.values.map((c)=>{
+                        tableRow.prepayment_amount = c.value;
+                    })
+                    break;
+                case 'Оплачено полностью':
+                    a.values.map((c)=>{
+                        tableRow.full_payment = c.value;
+                    })
+                    break;
+                case 'Остаток':
+                    a.values.map((c)=>{
+                        tableRow.balance = c.value;
+                    })
+                    break;
+                case 'Доплата способ':
+                    a.values.map((c)=>{
+                        tableRow.additional_payment_method = c.value;
+                    })
+                    break;
+                case 'Дата доплаты':
+                    a.values.map((c)=>{
+                        tableRow.additional_payment_date = c.value;
+                    })
+                    break;
+                case 'Ссылка распил':
+                    a.values.map((c)=>{
+                        tableRow.saw_link = c.value;
+                    })
+                    break;
+                case 'Ссылка каркас':
+                    a.values.map((c)=>{
+                        tableRow.frame_link = c.value;
+                    })
+                    break;
+                case 'Ссылка закройщик':
+                    a.values.map((c)=>{
+                        tableRow.cutter_link = c.value;
+                    })
+                    break;  
+                case 'Ссылка швеи':
+                    a.values.map((c)=>{
+                        tableRow.sewer_link = c.value;
+                    })
+                    break;
+                case 'Ссылка обивщик':
+                    a.values.map((c)=>{
+                        tableRow.upholsterer_link = c.value;
+                    })
+                    break;
+                case 'Ссылка нач. производства':
+                    a.values.map((c)=>{
+                        tableRow.boss_link = c.value;
+                    })
+                    break;
+                case 'Ссылка бухгалтер':
+                    a.values.map((c)=>{
+                        tableRow.accountant_link = c.value;
+                    })
+                    break;
+                case 'Ссылка водитель':
+                    a.values.map((c)=>{
+                        tableRow.driver_link = c.value;
+                    })
+                    break;
+                case 'Стоимость работы распил Б':
+                    a.values.map((c)=>{
+                        tableRow.saw_work_cost_b = c.value;
+                    })
+                    break;
+                case 'Стоимость работы каркас Б':
+                    a.values.map((c)=>{
+                        tableRow.frame_work_cost_b = c.value;
+                    })
+                    break;
+                case 'Стоимость работы закройщик Б':
+                    a.values.map((c)=>{
+                        tableRow.cut_work_cost_b = c.value;
+                    })
+                    break;
+                case 'Стоимость работы швея Б':
+                    a.values.map((c)=>{
+                        tableRow.sewer_work_cost_b = c.value;
+                    })
+                    break;
+                case 'Стоимость работы обивщик Б':
+                    a.values.map((c)=>{
+                        tableRow.upholsterer_work_cost_b = c.value;
+                    })
+                    break;
+                case 'Примечание (распил)':
+                    a.values.map((c)=>{
+                        tableRow.note_sawer = c.value;
+                    })
+                    break;
+                case 'Примечание (каркас)':
+                    a.values.map((c)=>{
+                        tableRow.note_framer = c.value;
+                    })
+                    break;
+                case 'Примечание (закройщик)':
+                    a.values.map((c)=>{
+                        tableRow.note_cutter = c.value;
+                    })
+                    break;
+                case 'Примечание (швея)':
+                    a.values.map((c)=>{
+                        tableRow.note_sewer = c.value;
+                    })
+                    break;
+                case 'Примечание (обивщик)':
+                    a.values.map((c)=>{
+                        tableRow.note_upholsterer = c.value;
+                    })
+                    break;
+                case 'Примечание (ОТК)':
+                    a.values.map((c)=>{
+                        tableRow.note_otk = c.value;
+                    })
+                    break;
+                case 'Примечание для водителей':
+                    a.values.map((c)=>{
+                        tableRow.note_driver = c.value;
+                    })
+                    break;
+                case 'Работа оплачена распил':
+                    a.values.map((c)=>{
+                        tableRow.work_paid_sawer = c.value;
+                    })
+                    break;
+                case 'Работа оплачена каркас':
+                    a.values.map((c)=>{
+                        tableRow.work_paid_framer = c.value;
+                    })
+                    break;
+                case 'Работа оплачена закройщик':
+                    a.values.map((c)=>{
+                        tableRow.work_paid_cutter = c.value;
+                    })
+                    break;
+                case 'Работа оплачена швея':
+                    a.values.map((c)=>{
+                        tableRow.work_paid_sewer = c.value;
+                    })
+                    break;
+                case 'Работа оплачена обивщик':
+                    a.values.map((c)=>{
+                        tableRow.work_paid_upholsterer = c.value;
+                    })
+                    break;
+                case 'Принят Закройщик':
+                    a.values.map((c)=>{
+                        tableRow.accepted = c.value;
+                    })
+                    break;
+                case 'Выдал':
+                    a.values.map((c)=>{
+                        tableRow.cutter = c.value;
+                    })
+                    break;
+                case 'Ссылка ткани':
+                    a.values.map((c)=>{
+                        tableRow.textile_link = c.value;
+                    })
+                    break;
+                case 'Ткань выдана':
+                    a.values.map((c)=>{
+                        tableRow.textile_issued = c.value;
+                    })
+                    break;
+                case 'Поставщик (основ)':
+                    a.values.map((c)=>{
+                        tableRow.supplier_base = c.value;
+                    })
+                    break;
+                case 'Поставщик (комп)':
+                    a.values.map((c)=>{
+                        tableRow.supplier_comp = c.value;
+                    })
+                    break;
+                case 'Ссылка заказ ткани':
+                    a.values.map((c)=>{
+                        tableRow.textile_order_link = c.value;
+                    })
+                    break;
+                case 'Дата заказ ткани':
+                    a.values.map((c)=>{
+                        tableRow.textile_order_date = c.value;
+                    })
+                    break;
+                case 'Поставщик основа':
+                    a.values.map((c)=>{
+                        tableRow.supplier_base_ext = c.value;
+                    })
+                    break;
+                case 'Поставщик комп':
+                    a.values.map((c)=>{
+                        tableRow.supplier_comp_ext = c.value;
+                    })
+                    break;
+                case 'Заказан метраж основа':
+                    a.values.map((c)=>{
+                        tableRow.footage_ordered_base = c.value;
+                    })
+                    break;
+                case 'Заказан метраж комп':
+                    a.values.map((c)=>{
+                        tableRow.footage_ordered_comp = c.value;
+                    })
+                    break;
+                case 'Ор дата прих ОСНОВА':
+                    a.values.map((c)=>{
+                        tableRow.expected_footage_delivery_base = c.value;
+                    })
+                    break;
+                case 'Ор дата прих КОМП':
+                    a.values.map((c)=>{
+                        tableRow.expected_footage_delivery_comp = c.value;
+                    })
+                    break;
+                case 'Дата прихода КОМП':
+                    a.values.map((c)=>{
+                        tableRow.footage_received_comp = c.value;
+                    })
+                    break;
+                case 'Дата прихода ОСНОВА':
+                    a.values.map((c)=>{
+                        tableRow.footage_received_base = c.value;
+                    })
+                    break;
+                case 'Очередность закрой':
+                    a.values.map((c)=>{
+                        tableRow.cutting_sequence = c.value;
+                    })
+                    break;
+                case 'Очередность обивка':
+                    a.values.map((c)=>{
+                        tableRow.upholstery_sequence = c.value;
+                    })
+                    break;
+                case 'N счета ПП':
+                    a.values.map((c)=>{
+                        tableRow.pp_invoice_number = c.value;
+                    })
+                    break;
+                case 'Внес запись':
+                    a.values.map((c)=>{
+                        tableRow.entry_made = c.value;
+                    })
+                    break;
+                case 'Статья ДДС':
+                    a.values.map((c)=>{
+                        tableRow.dds_article = c.value;
+                    })
+                    break;
+                case 'Тип операции':
+                    a.values.map((c)=>{
+                        tableRow.operation_type = c.value;
+                    })
+                    break;
+                case 'Статьи PL':
+                    a.values.map((c)=>{
+                        tableRow.pl_articles = c.value;
+                    })
+                    break;
+                case 'Тип оплаты':
+                    a.values.map((c)=>{
+                        tableRow.payment_type = c.value;
+                    })
+                    break;
+                case 'Дата операции':
+                    a.values.map((c)=>{
+                        tableRow.operation_date = c.value;
+                    })
+                    break;
+                case 'Дата начисления':
+                    a.values.map((c)=>{
+                        tableRow.accural_date = c.value;
+                    })
+                    break;
+                case 'Сумма':
+                    a.values.map((c)=>{
+                        tableRow.sum = c.value;
+                    })
+                    break;
+                case 'Комментарий':
+                    a.values.map((c)=>{
+                        tableRow.comment = c.value;
+                    })
+                    break;
+                case 'Сотрудник':
+                    a.values.map((c)=>{
+                        tableRow.employee = c.value;
+                    })
+                    break;
+                case 'Ткань выдана 2':
+                    a.values.map((c)=>{
+                        tableRow.textile_issued_2 = c.value;
+                    })
+                    break;
+                case 'Оптовик бух':
+                    a.values.map((c)=>{
+                        tableRow.wholesaler_accontert = c.value;
+                    })
+                    break;
+                case 'Виртуальный номер':
+                    a.values.map((c)=>{
+                        tableRow.virtual_number = c.value;
+                    })
+                    break;
+                case 'Забрал ФИО водителя':
+                    a.values.map((c)=>{
+                        tableRow.fio_pickup_driver = c.value;
+                    })
+                    break;
+                case 'Дата вывоза с адреса':
+                    a.values.map((c)=>{
+                        tableRow.removal_date = c.value;
+                    })
+                    break;
+                case 'Сумма доплаты':
+                    a.values.map((c)=>{
+                        tableRow.surcharge_amount = c.value;
+                    })
+                    break;
+                case 'Дата ОТК':
+                    a.values.map((c)=>{
+                        tableRow.otk_date = c.value;
+                    })
+                    break;
+                case 'Серия № паспорта':
+                    a.values.map((c)=>{
+                        tableRow.passport_data = c.value;
+                    })
+                    break;
+                case 'Заметки':
+                    a.values.map((c)=>{
+                        tableRow.notes = c.value;
+                    })
+                    break;
+                case 'ФИО отв витр':
+                    a.values.map((c)=>{
+                        tableRow.fio_accountant = c.value;
+                    })
+                    break;
+                case 'Дата возврата':
+                    a.values.map((c)=>{
+                        tableRow.return_date = c.value;
+                    })
+                    break;
+                case 'Примечание возврат':
+                    a.values.map((c)=>{
+                        tableRow.return_notes = c.value;
+                    })
+                    break;
+                case 'Метраж ткани комп':
+                    a.values.map((c)=>{
+                        tableRow.textile_footage_comp = c.value;
+                    })
+                    break;
+                case 'Коментарий по доплате':
+                    a.values.map((c)=>{
+                        tableRow.surcharge_comment = c.value;
+                    })
+                    break;
+                case 'Тут зашита формула по метражу':
+                    a.values.map((c)=>{
+                        tableRow.return_formula = c.value;
+                    })
+                    break;
+                default:
+                    break;
+
                 }
+                
+                
         });
 
         

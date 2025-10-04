@@ -102,7 +102,7 @@ export interface AmoExport {
     expected_sofa_done: string,
     expected_frame_done: string,
     expected_sewing_done: string,
-    seats_quantity: number,
+    seats_quantity: string,
     otk_accepted: string,
     remark: string,	
     rise_to_floor: string,	
