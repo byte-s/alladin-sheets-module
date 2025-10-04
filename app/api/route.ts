@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         status: '',
         phone: '',
         budget: 0,
-        sync_date: 0,
+        sync_date: '',
         funnel_stage: '',
         ad_source: '',
         lead_source: '',
@@ -244,7 +244,7 @@ export async function POST(request: Request) {
         statusname ? tableRow.status = statusname : tableRow.status = '';
         phoneNumber ? tableRow.phone = phoneNumber : tableRow.phone = '';
         tableRow.budget = resBody.price;
-        tableRow.sync_date = Math.floor(now.getTime() / 1000); ///исправить
+        tableRow.sync_date = format(new Date(), 'dd/MM/yyyy'); ///исправить
         piplinename ? tableRow.funnel_stage = piplinename : tableRow.funnel_stage = '';
 
         resBody.custom_fields_values.map((a)=>{

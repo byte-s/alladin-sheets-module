@@ -48,7 +48,7 @@ export interface AmoExport {
     status: string,
     phone: string,
     budget: number,
-    sync_date: number,
+    sync_date: string,
     funnel_stage: string,
     ad_source: string,
     lead_source: string,
