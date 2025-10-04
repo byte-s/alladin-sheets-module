@@ -3,7 +3,7 @@ import { JWT } from 'google-auth-library'
 import creds from '../../quiet-dryad-creds.json'
 import { json } from 'stream/consumers';
 import { AmoExport, Lead, LeadFieldValue, Data, Contact } from '@/lib/db.d';
-import { getContact, getStatus, getUser } from '@/lib/db';
+import { getContact, getPipeline, getStatus, getUser } from '@/lib/db';
 
 export const config = {
       api: {
@@ -219,6 +219,8 @@ export async function POST(request: Request) {
         const username = await getUser(resBody.responsible_user_id.toString());
         const contactname = await getContact(resBody._embedded.contacts[0].id.toString());
         const statusname = await getStatus(resBody.status_id.toString());
+        const piplinename = await getPipeline();
+
         let phoneNumber;
 
         if(contactname != null){
@@ -242,6 +244,83 @@ export async function POST(request: Request) {
         phoneNumber ? tableRow.phone = phoneNumber : tableRow.phone = '';
         tableRow.budget = resBody.price;
         tableRow.sync_date = Math.floor(now.getTime() / 1000); ///исправить
+        piplinename ? tableRow.funnel_stage = piplinename : tableRow.funnel_stage = '';
+
+        resBody.custom_fields_values.map((a)=>{
+            switch(a.field_name){
+                case 'Источник сделки':
+                    a.values.map((c)=>{
+                        tableRow.lead_source = c.value;
+                    })
+                    break;
+                case 'Коммуникация':
+                    a.values.map((c)=>{
+                        tableRow.communication = c.value;
+                    })
+                    break;
+                case 'Прогноз. дата визита':
+                    a.values.map((c)=>{
+                        tableRow.expected_visit_date = c.value;
+                    })
+                    break;
+                case 'Оптовик':
+                    a.values.map((c)=>{
+                        tableRow.wholesaler = c.value;
+                    })
+                    break;
+                case 'Дата заявки':
+                    a.values.map((c)=>{
+                        tableRow.application_date = c.value;
+                    })
+                    break;
+                case 'Модель дивана':
+                    a.values.map((c)=>{
+                        tableRow.sofa_model = c.value;
+                    })
+                    break;
+                case 'Форма дивана':
+                    a.values.map((c)=>{
+                        tableRow.sofa_form = c.value;
+                    })
+                    break;
+                case 'Комплектность':
+                    a.values.map((c)=>{
+                        tableRow.completeness = c.value;
+                    })
+                    break;
+                case 'Механизм':
+                    a.values.map((c)=>{
+                        tableRow.mechanism = c.value;
+                    })
+                    break;
+                case 'Основа (сиденье)':
+                    a.values.map((c)=>{
+                        tableRow.seat_base = c.value;
+                    })
+                    break;
+                case 'Стоимость ткани (основа)':
+                    a.values.map((c)=>{
+                        tableRow.base_textile_cost = c.value;
+                    })
+                    break;
+                case 'Компаньон':
+                    a.values.map((c)=>{
+                        tableRow.compaion = c.value;
+                    })
+                    break;
+                case 'Стоимость ткани (компаньон)':
+                    a.values.map((c)=>{
+                        tableRow.companion_textile_cost = c.value;
+                    })
+                    break;
+                case 'Угол':
+                    a.values.map((c)=>{
+                        tableRow.corner = c.value;
+                    })
+                    break;
+                }
+        });
+
         
 
         // resBody.custom_fields_values.map((a)=>{
