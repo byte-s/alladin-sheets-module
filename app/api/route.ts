@@ -236,7 +236,7 @@ export async function POST(request: Request) {
         
         tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
         tableRow.ID = resBody.id;
-        tableRow.created_at = format(fromUnixTime(resBody.created_at), 'dd/MM/yyyy'); //исправить
+        tableRow.created_at = format(new Date(fromUnixTime(resBody.created_at)), 'dd/MM/yyyy'); //исправить
         tableRow.lead_month = format(new Date(fromUnixTime(resBody.created_at).getFullYear(), fromUnixTime(resBody.created_at).getMonth(), 1).toLocaleDateString("ru-RU"), 'dd/MM/yyyy');
         username ? tableRow.manager = username : tableRow.manager = '';
         contactname ? tableRow.client_name = contactname.name : tableRow.client_name = '';
@@ -261,7 +261,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Прогноз. дата визита':
                     a.values.map((c)=>{
-                        tableRow.expected_visit_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
+                        tableRow.expected_visit_date = format(new Date(fromUnixTime(Number(c.value))), 'dd/MM/yyyy');;
                     })
                     break;
                 case 'Оптовик':
