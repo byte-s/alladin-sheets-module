@@ -4,6 +4,7 @@ import creds from '../../quiet-dryad-creds.json'
 import { json } from 'stream/consumers';
 import { AmoExport, Lead, LeadFieldValue, Data, Contact } from '@/lib/db.d';
 import { getContact, getPipeline, getStatus, getUser } from '@/lib/db';
+import { fromUnixTime, format } from "date-fns";
 
 export const config = {
       api: {
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
     let tableRow:AmoExport = {
         link: '',
         ID: 0,
-        created_at: 0,
+        created_at: '',
         lead_month: '',
         manager: '',
         client_name: '',
@@ -235,8 +236,8 @@ export async function POST(request: Request) {
         
         tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
         tableRow.ID = resBody.id;
-        tableRow.created_at = resBody.created_at; //исправить
-        tableRow.lead_month = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("ru-RU");
+        tableRow.created_at = format(fromUnixTime(resBody.created_at), 'dd/MM/yyyy'); //исправить
+        tableRow.lead_month = format(new Date(fromUnixTime(resBody.created_at).getFullYear(), fromUnixTime(resBody.created_at).getMonth(), 1).toLocaleDateString("ru-RU"), 'dd/MM/yyyy');
         username ? tableRow.manager = username : tableRow.manager = '';
         contactname ? tableRow.client_name = contactname.name : tableRow.client_name = '';
         tableRow.lead_name = resBody.name;
@@ -260,7 +261,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Прогноз. дата визита':
                     a.values.map((c)=>{
-                        tableRow.expected_visit_date = c.value;
+                        tableRow.expected_visit_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Оптовик':
@@ -270,7 +271,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата заявки':
                     a.values.map((c)=>{
-                        tableRow.application_date = c.value;
+                        tableRow.application_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Модель дивана':
@@ -370,7 +371,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата выдачи ткани':
                     a.values.map((c)=>{
-                        tableRow.textile_delivery = c.value;
+                        tableRow.textile_delivery = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Номер дивана':
@@ -385,7 +386,7 @@ export async function POST(request: Request) {
                     break; 
                 case 'Дата распил':
                     a.values.map((c)=>{
-                        tableRow.saw_date = c.value;
+                        tableRow.saw_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Распиловка':
@@ -405,7 +406,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата каркас':
                     a.values.map((c)=>{
-                        tableRow.frame_date = c.value;
+                        tableRow.frame_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Каркас':
@@ -425,7 +426,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата закрой':
                     a.values.map((c)=>{
-                        tableRow.cut_date = c.value;
+                        tableRow.cut_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Закройщики':
@@ -445,7 +446,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата швея':
                     a.values.map((c)=>{
-                        tableRow.sewer_date = c.value;
+                        tableRow.sewer_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Швеи':
@@ -465,7 +466,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата обивщик':
                     a.values.map((c)=>{
-                        tableRow.upholsterer_date = c.value;
+                        tableRow.upholsterer_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Обивщики':
@@ -480,17 +481,17 @@ export async function POST(request: Request) {
                     break;
                 case 'Ор-тир. дата готов.дивана':
                     a.values.map((c)=>{
-                        tableRow.expected_sofa_done = c.value;
+                        tableRow.expected_sofa_done = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Ор-тир. дата готов.каркаса':
                     a.values.map((c)=>{
-                        tableRow.expected_frame_done = c.value;
+                        tableRow.expected_frame_done = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Ор-тир. дата готов.шитья':
                     a.values.map((c)=>{
-                        tableRow.expected_sewing_done = c.value;
+                        tableRow.expected_sewing_done = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Кол-во мест':
@@ -540,12 +541,12 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата доставки':
                     a.values.map((c)=>{
-                        tableRow.delivery_date = c.value;
+                        tableRow.delivery_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Дата самовывоза':
                     a.values.map((c)=>{
-                        tableRow.pickup_date = c.value;
+                        tableRow.pickup_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Водители':
@@ -560,7 +561,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата оплаты':
                     a.values.map((c)=>{
-                        tableRow.pay_date = c.value;
+                        tableRow.pay_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Номер договора':
@@ -605,7 +606,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата доплаты':
                     a.values.map((c)=>{
-                        tableRow.additional_payment_date = c.value;
+                        tableRow.additional_payment_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Ссылка распил':
@@ -770,7 +771,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата заказ ткани':
                     a.values.map((c)=>{
-                        tableRow.textile_order_date = c.value;
+                        tableRow.textile_order_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Поставщик основа':
@@ -795,22 +796,22 @@ export async function POST(request: Request) {
                     break;
                 case 'Ор дата прих ОСНОВА':
                     a.values.map((c)=>{
-                        tableRow.expected_footage_delivery_base = c.value;
+                        tableRow.expected_footage_delivery_base = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Ор дата прих КОМП':
                     a.values.map((c)=>{
-                        tableRow.expected_footage_delivery_comp = c.value;
+                        tableRow.expected_footage_delivery_comp = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Дата прихода КОМП':
                     a.values.map((c)=>{
-                        tableRow.footage_received_comp = c.value;
+                        tableRow.footage_received_comp = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Дата прихода ОСНОВА':
                     a.values.map((c)=>{
-                        tableRow.footage_received_base = c.value;
+                        tableRow.footage_received_base = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Очередность закрой':
@@ -855,12 +856,12 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата операции':
                     a.values.map((c)=>{
-                        tableRow.operation_date = c.value;
+                        tableRow.operation_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Дата начисления':
                     a.values.map((c)=>{
-                        tableRow.accural_date = c.value;
+                        tableRow.accural_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Сумма':
@@ -900,7 +901,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата вывоза с адреса':
                     a.values.map((c)=>{
-                        tableRow.removal_date = c.value;
+                        tableRow.removal_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Сумма доплаты':
@@ -910,7 +911,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата ОТК':
                     a.values.map((c)=>{
-                        tableRow.otk_date = c.value;
+                        tableRow.otk_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Серия № паспорта':
@@ -930,7 +931,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата возврата':
                     a.values.map((c)=>{
-                        tableRow.return_date = c.value;
+                        tableRow.return_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Примечание возврат':

@@ -40,7 +40,7 @@ export interface Lead {
 export interface AmoExport {
     link: string,
     ID: number,
-    created_at: number,
+    created_at: string,
     lead_month: string,
     manager: string,
     client_name: string,
