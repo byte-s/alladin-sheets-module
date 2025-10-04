@@ -39,6 +39,7 @@ export async function POST(request: Request) {
 
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
+    const rows = await sheet.getRows();
 
     let tableRow:AmoExport = {
         link: '',
@@ -971,13 +972,25 @@ export async function POST(request: Request) {
         //         resBodyValues.push(c.value);
         //     })
         // })
-        const addRow = await sheet.addRow(Object.values(tableRow));
 
-        if(addRow){
-            return Response.json({ text:'Успех' })
-        } else{
-            return Response.json({ text:'Не успех' })
-        }
+        let isExist = false;
+
+        rows.map(async (f)=>{
+            if(f.get('ID') == resBody.id){
+                f._clearRowData();
+                f.assign(Object.values(tableRow));
+            } else {
+                const addRow = await sheet.addRow(Object.values(tableRow));
+                if(addRow){
+                    return Response.json({ text:'Успех' })
+                } else{
+                    return Response.json({ text:'Не успех' })
+                }
+            }
+        })
+
+
+        
     } else{
         return Response.json({ text:'Не успех' })
     }
