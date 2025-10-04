@@ -318,6 +318,66 @@ export async function POST(request: Request) {
                         tableRow.corner = c.value;
                     })
                     break;
+                case 'Подлокотники':
+                    a.values.map((c)=>{
+                        tableRow.armrests = c.value;
+                    })
+                    break;
+                case 'Вставки':
+                    a.values.map((c)=>{
+                        tableRow.inserts = c.value;
+                    })
+                    break;
+                case 'Подушки':
+                    a.values.map((c)=>{
+                        tableRow.pillows = c.value;
+                    })
+                    break;
+                case 'Доп. опции':
+                    a.values.map((c)=>{
+                        tableRow.stitching_color = c.value;
+                    })
+                    break;  
+                case 'Место сделки':
+                    a.values.map((c)=>{
+                        tableRow.deal_place = c.value;
+                    })
+                    break;
+                case 'Откуда узнали?':
+                    a.values.map((c)=>{
+                        tableRow.know_source = c.value;
+                    })
+                    break;
+                case 'Ткань в наличии':
+                    a.values.map((c)=>{
+                        tableRow.textile_stock = c.value;
+                    })
+                    break;
+                case 'Ткань заказана':
+                    a.values.map((c)=>{
+                        tableRow.textile_order = c.value;
+                    })
+                    break;
+                case 'Ориентир. дата поступ. ткани':
+                    a.values.map((c)=>{
+                        tableRow.expected_textile_delivery = c.value;
+                    })
+                    break;
+                case 'Метраж ткани':
+                    a.values.map((c)=>{
+                        tableRow.textile_footage = c.value;
+                    })
+                    break;
+                case 'Дата выдачи ткани':
+                    a.values.map((c)=>{
+                        tableRow.textile_delivery = c.value;
+                    })
+                    break;
+                case 'Номер дивана':
+                    a.values.map((c)=>{
+                        tableRow.sofa_number = c.value;
+                    })
+                    break;
                 }
         });
 
