@@ -4,7 +4,7 @@ import creds from '../../quiet-dryad-creds.json'
 import { json } from 'stream/consumers';
 import { AmoExport, Lead, LeadFieldValue, Data, Contact } from '@/lib/db.d';
 import { getContact, getPipeline, getStatus, getUser } from '@/lib/db';
-import { fromUnixTime, format } from "date-fns";
+import { fromUnixTime, format, addDays } from "date-fns";
 
 export const config = {
       api: {
@@ -261,7 +261,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Прогноз. дата визита':
                     a.values.map((c)=>{
-                        tableRow.expected_visit_date = format(new Date(fromUnixTime(Number(c.value))), 'dd/MM/yyyy');;
+                        tableRow.expected_visit_date = format(new Date(Number(c.value) * 1000), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Оптовик':
@@ -271,7 +271,7 @@ export async function POST(request: Request) {
                     break;
                 case 'Дата заявки':
                     a.values.map((c)=>{
-                        tableRow.application_date = format(fromUnixTime(Number(c.value)), 'dd/MM/yyyy');
+                        tableRow.application_date = format(new Date(Number(c.value) * 1000), 'dd/MM/yyyy');
                     })
                     break;
                 case 'Модель дивана':
