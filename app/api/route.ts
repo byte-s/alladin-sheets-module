@@ -264,27 +264,27 @@ export async function POST(request: Request) {
         const statusname = await getStatus(resBody.status_id.toString());
         let phoneNumber;
 
-        if(contactname != null){
-            contactname.custom_fields_values.map((a)=>{
-                    if(a.field_code == 'PHONE'){
-                        a.values.map((c)=>{
-                            phoneNumber = c.value;
-                        })
-                    }
-                })
-        }
+        // if(contactname != null){
+        //     contactname.custom_fields_values.map((a)=>{
+        //             if(a.field_code == 'PHONE'){
+        //                 a.values.map((c)=>{
+        //                     phoneNumber = c.value;
+        //                 })
+        //             }
+        //         })
+        // }
         
-        tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
+        // tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
         tableRow.ID = resBody.id;
-        tableRow.created_at = resBody.created_at;
-        tableRow.lead_month = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("ru-RU");
-        username ? tableRow.manager = username : tableRow.manager = '';
-        contactname ? tableRow.client_name = contactname.name : tableRow.client_name = '';
-        tableRow.lead_name = resBody.name;
-        statusname ? tableRow.status = statusname : tableRow.status = '';
-        phoneNumber ? tableRow.phone = phoneNumber : tableRow.phone = '';
-        tableRow.budget = resBody.price;
-        tableRow.sync_date = Math.floor(now.getTime() / 1000); ///исправить
+        // tableRow.created_at = resBody.created_at;
+        // tableRow.lead_month = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("ru-RU");
+        // username ? tableRow.manager = username : tableRow.manager = '';
+        // contactname ? tableRow.client_name = contactname.name : tableRow.client_name = '';
+        // tableRow.lead_name = resBody.name;
+        // statusname ? tableRow.status = statusname : tableRow.status = '';
+        // phoneNumber ? tableRow.phone = phoneNumber : tableRow.phone = '';
+        // tableRow.budget = resBody.price;
+        // tableRow.sync_date = Math.floor(now.getTime() / 1000); ///исправить
         
 
         resBody.custom_fields_values.map((a)=>{
