@@ -3,7 +3,7 @@ import { JWT } from 'google-auth-library'
 import creds from '../../quiet-dryad-creds.json'
 import { json } from 'stream/consumers';
 import { AmoExport, Lead, LeadFieldValue, Data, Contact } from '@/lib/db.d';
-import { getContact, getPipeline, getStatus, getUser } from '@/lib/db';
+import { getContact, getPipeline, getStatus, getUser, header_rows } from '@/lib/db';
 import { fromUnixTime, format, } from "date-fns";
 import { TZDate } from "@date-fns/tz";
 
@@ -40,6 +40,7 @@ export async function POST(request: Request) {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
     const rows = await sheet.getRows();
+    sheet.setHeaderRow(header_rows);
 
     let tableRow:AmoExport = {
         link: '',
