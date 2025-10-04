@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.4.1",
     "date-fns": "^4.1.0",
     "google-auth-library": "^10.3.0",
     "google-spreadsheet": "^5.0.2",
