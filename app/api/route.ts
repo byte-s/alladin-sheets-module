@@ -292,7 +292,7 @@ export async function POST(request: Request) {
         //         resBodyValues.push(c.value);
         //     })
         // })
-        const addRow = await sheet.addRow([tableRow.link, tableRow.ID, tableRow.created_at, tableRow.lead_month]);
+        const addRow = await sheet.addRow([tableRow.link, tableRow.ID, tableRow.created_at, tableRow.lead_month, tableRow.manager]);
 
         if(addRow){
             return Response.json({ text:'Успех' })
