@@ -977,7 +977,7 @@ export async function POST(request: Request) {
         let isExist = false;
 
         rows.map(async (f)=>{
-            if(f.get('ID') == resBody.id){
+            if(f.toObject().ID == resBody.id){
                 f._clearRowData();
                 f.assign(Object.values(tableRow));
             } else {
