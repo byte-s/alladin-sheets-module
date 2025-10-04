@@ -274,7 +274,7 @@ export async function POST(request: Request) {
         //         })
         // }
         
-        tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
+        //tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
         tableRow.ID = resBody.id;
         tableRow.created_at = resBody.created_at;
         // tableRow.lead_month = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString("ru-RU");
@@ -292,7 +292,7 @@ export async function POST(request: Request) {
                 resBodyValues.push(c.value);
             })
         })
-        const addRow = await sheet.addRow([tableRow.link, tableRow.ID, tableRow.created_at]);
+        const addRow = await sheet.addRow([tableRow.ID, tableRow.created_at]);
 
         if(addRow){
             return Response.json({ text:'Успех' })
