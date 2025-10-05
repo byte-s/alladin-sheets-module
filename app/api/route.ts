@@ -980,9 +980,9 @@ export async function POST(request: Request) {
             if(f.toObject().ID == resBody.id){
                 isExist = true;
                 sheet.clear(f.a1Range.replace("'Лист1'!'Лист1'", ''));
-                for (var key in tableRow) {
-                    f.set(key, tableRow[key as keyof typeof tableRow] || '' );
-                }
+                // for (var key in tableRow) {
+                //     f.set(key, tableRow[key as keyof typeof tableRow] || '' );
+                // }
             }
         })
 
