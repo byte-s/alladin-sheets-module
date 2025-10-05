@@ -984,6 +984,7 @@ export async function POST(request: Request) {
                 for (var key in tableRow) {
                     f.set(key, tableRow[key as keyof typeof tableRow] || '' );
                 }
+                await f.save();
             }
         })
 
