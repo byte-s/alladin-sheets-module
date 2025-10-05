@@ -979,7 +979,7 @@ export async function POST(request: Request) {
         rows.map(async (f)=>{
             if(f.toObject().ID == resBody.id){
                 isExist = true;
-                sheet.clear(f.a1Range);
+                sheet.clear(f.a1Range.replace("'Лист1'!'Лист1'", ''));
                 for (var key in tableRow) {
                     f.set(key, tableRow[key as keyof typeof tableRow] || '' );
                 }
