@@ -1,4 +1,4 @@
-import {GoogleSpreadsheet} from 'google-spreadsheet';
+import {GoogleSpreadsheet, GoogleSpreadsheetRow} from 'google-spreadsheet';
 import { JWT } from 'google-auth-library'
 import creds from '../../quiet-dryad-creds.json'
 import { json } from 'stream/consumers';
@@ -973,24 +973,28 @@ export async function POST(request: Request) {
         //         resBodyValues.push(c.value);
         //     })
         // })
-
         let isExist = false;
 
         rows.map(async (f)=>{
             if(f.toObject().ID == resBody.id){
+                isExist = true;
                 f._clearRowData();
                 f.assign(Object.values(tableRow));
-            } else {
-                const addRow = await sheet.addRow(Object.values(tableRow));
-                if(addRow){
-                    return Response.json({ text:'Успех' })
-                } else{
-                    return Response.json({ text:'Не успех' })
-                }
             }
         })
 
+        if(!isExist){
+            const addRow = await sheet.addRow(Object.values(tableRow));
+            if(addRow){
+                return Response.json({ text:'Успех' })
+            } else{
+                return Response.json({ text:'Не успех' })
+            }
+        } else{
+            return Response.json({ text:'Успех, значение обновлено' })
+        }
 
+        
         
     } else{
         return Response.json({ text:'Не успех' })
