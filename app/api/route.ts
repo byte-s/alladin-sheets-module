@@ -22,26 +22,7 @@ export async function POST(request: Request) {
     for (const value of formData.values()) {
         formDataValues.push(value.toString());
     }
-    //const text = formData.get('ttext') || 'ssss'
-
-    const SCOPES = [
-        'https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive.file',
-    ];
-
-    const jwt = new JWT({
-        email: creds.client_email,
-        key: creds.private_key,
-        scopes: SCOPES,
-    });
-
-    const doc = new GoogleSpreadsheet('1TRevNsY_rlLxJf4pUqAFTKOuT1esw4ogpY6Os-bknNw', jwt);
-
-    await doc.loadInfo();
-    const sheet = doc.sheetsByIndex[0];
-    const rows = await sheet.getRows();
-    sheet.setHeaderRow(header_rows);
-
+    
     let tableRow:AmoExport = {
         link: '',
         ID: 0,
@@ -201,6 +182,26 @@ export async function POST(request: Request) {
         surcharge_comment: '',
         return_formula: ''
     };
+
+    const SCOPES = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive.file',
+    ];
+
+    const jwt = new JWT({
+        email: creds.client_email,
+        key: creds.private_key,
+        scopes: SCOPES,
+    });
+
+    const doc = new GoogleSpreadsheet('1TRevNsY_rlLxJf4pUqAFTKOuT1esw4ogpY6Os-bknNw', jwt);
+
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0];
+    const rows = await sheet.getRows();
+    sheet.setHeaderRow(Object.keys(tableRow));
+
+    
 
     const now = new Date();
 
@@ -978,8 +979,10 @@ export async function POST(request: Request) {
         rows.map(async (f)=>{
             if(f.toObject().ID == resBody.id){
                 isExist = true;
-                f._clearRowData();
-                f.assign(Object.values(tableRow));
+                sheet.clear(f.a1Range);
+                for (var key in tableRow) {
+                    f.set(key, tableRow[key as keyof typeof tableRow] || '' );
+                }
             }
         })
 
