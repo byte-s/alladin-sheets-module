@@ -224,8 +224,8 @@ export async function POST(request: Request) {
 
         const username = await getUser(resBody.responsible_user_id.toString());
         const contactname = await getContact(resBody._embedded.contacts[0].id.toString());
-        const statusname = await getStatus(resBody.status_id.toString());
-        const piplinename = await getPipeline();
+        const statusname = await getStatus(resBody.pipeline_id.toString(), resBody.status_id.toString());
+        const piplinename = await getPipeline(resBody.pipeline_id.toString());
 
         let phoneNumber;
 
