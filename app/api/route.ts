@@ -201,14 +201,7 @@ export async function POST(request: Request) {
     const rows = await sheet.getRows();
     sheet.setHeaderRow(Object.keys(tableRow));
 
-    
-
     const now = new Date();
-
-
-    
-
-    
 
     const response = await fetch('https://mfalladin55.amocrm.ru/api/v4/leads/' + formDataValues[0] +'?with=contacts', {
         method: "GET",
@@ -230,7 +223,7 @@ export async function POST(request: Request) {
         if(resBody.responsible_user_id){
             username = await getUser(resBody.responsible_user_id.toString());
         }
-        if(resBody._embedded.contacts[0].id){
+        if(resBody._embedded.contacts[0]){
             contactname = await getContact(resBody._embedded.contacts[0].id.toString());
         }
         if(resBody.pipeline_id && resBody.status_id){
@@ -251,8 +244,8 @@ export async function POST(request: Request) {
                 })
         }
         
-        resBody.id ? tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")' : tableRow.link = 'Не найдено';
-        resBody.id ? tableRow.ID = resBody.id : tableRow.ID=0;
+        tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
+        tableRow.ID = resBody.id;
         tableRow.created_at = format(new TZDate(Number(resBody.created_at) * 1000).withTimeZone("Asia/Omsk"), 'dd/MM/yyyy');
         tableRow.lead_month = format(new Date(fromUnixTime(resBody.created_at).getFullYear(), fromUnixTime(resBody.created_at).getMonth(), 1).toLocaleDateString("ru-RU"), 'dd/MM/yyyy');
         username ? tableRow.manager = username : tableRow.manager = '';
