@@ -222,11 +222,23 @@ export async function POST(request: Request) {
         const resBody:Lead = await response.json();
         let resBodyValues:string[] = [];
 
-        const username = await getUser(resBody.responsible_user_id.toString());
-        const contactname = await getContact(resBody._embedded.contacts[0].id.toString());
-        const statusname = await getStatus(resBody.pipeline_id.toString(), resBody.status_id.toString());
-        const piplinename = await getPipeline(resBody.pipeline_id.toString());
+        let username = '';
+        let contactname = null;
+        let statusname = '';
+        let piplinename = '';
 
+        if(resBody.responsible_user_id){
+            username = await getUser(resBody.responsible_user_id.toString());
+        }
+        if(resBody._embedded.contacts[0].id){
+            contactname = await getContact(resBody._embedded.contacts[0].id.toString());
+        }
+        if(resBody.pipeline_id && resBody.status_id){
+            statusname = await getStatus(resBody.pipeline_id.toString(), resBody.status_id.toString());
+        }
+        if(resBody.pipeline_id){
+            piplinename = await getPipeline(resBody.pipeline_id.toString());
+        }
         let phoneNumber;
 
         if(contactname != null){
