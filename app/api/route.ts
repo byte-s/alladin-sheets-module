@@ -251,8 +251,8 @@ export async function POST(request: Request) {
                 })
         }
         
-        tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")';
-        tableRow.ID = resBody.id;
+        resBody.id ? tableRow.link = '=ГИПЕРССЫЛКА("https://mfalladin55.amocrm.ru/leads/detail/'+resBody.id+'"; "Перейти")' : tableRow.link = 'Не найдено';
+        resBody.id ? tableRow.ID = resBody.id : tableRow.ID=0;
         tableRow.created_at = format(new TZDate(Number(resBody.created_at) * 1000).withTimeZone("Asia/Omsk"), 'dd/MM/yyyy');
         tableRow.lead_month = format(new Date(fromUnixTime(resBody.created_at).getFullYear(), fromUnixTime(resBody.created_at).getMonth(), 1).toLocaleDateString("ru-RU"), 'dd/MM/yyyy');
         username ? tableRow.manager = username : tableRow.manager = '';
