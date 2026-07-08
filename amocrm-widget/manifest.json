@@ -1,0 +1,28 @@
+{
+    "widget": {
+        "actions": [],
+        "extension": "widget"
+    },
+    "settings_template": "",
+    "locale": {
+        "ru": {
+            "widget": {
+                "name": "Отправка сделки в таблицу",
+                "description": "Добавляет в карточку сделки кнопку, по клику на которую данные сделки отправляются в Google Таблицу",
+                "short_description": {
+                    "app": "Отправка сделки в Google Таблицу по кнопке"
+                }
+            }
+        },
+        "en": {
+            "widget": {
+                "name": "Send lead to sheet",
+                "description": "Adds a button to the lead card that sends the lead's data to a Google Sheet on click",
+                "short_description": {
+                    "app": "Send lead to Google Sheet on click"
+                }
+            }
+        }
+    },
+    "version": "1.0.0"
+}

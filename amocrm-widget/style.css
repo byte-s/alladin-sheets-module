@@ -1,0 +1,25 @@
+.sheet-sync-widget {
+    padding: 10px 0;
+}
+
+.sheet-sync-widget__button {
+    cursor: pointer;
+}
+
+.sheet-sync-widget__button[disabled] {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.sheet-sync-widget__status {
+    margin-top: 6px;
+    font-size: 12px;
+}
+
+.sheet-sync-widget__status--success {
+    color: #2ecc71;
+}
+
+.sheet-sync-widget__status--error {
+    color: #e74c3c;
+}
