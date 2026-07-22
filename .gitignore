@@ -36,6 +36,7 @@ yarn-error.log*
 # secrets
 quiet-dryad-creds.json
 quiet-dryad-*.json
+tokens.json
 
 # vercel
 .vercel
