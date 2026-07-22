@@ -37,7 +37,11 @@ export async function POST(request: Request) {
         return Response.json({ text: 'Не передан ID сделки' }, { status: 400, headers });
     }
 
-    const result = await syncLeadToSheet(leadId);
-
-    return Response.json({ text: result.message }, { status: result.ok ? 200 : 502, headers });
+    try {
+        const result = await syncLeadToSheet(leadId);
+        return Response.json({ text: result.message }, { status: result.ok ? 200 : 502, headers });
+    } catch (error) {
+        console.error('syncLeadToSheet failed', error);
+        return Response.json({ text: 'Внутренняя ошибка сервера' }, { status: 500, headers });
+    }
 }
