@@ -1,28 +1,45 @@
 {
     "widget": {
-        "actions": [],
-        "extension": "widget"
-    },
-    "settings_template": "",
-    "locale": {
-        "ru": {
-            "widget": {
-                "name": "Отправка сделки в таблицу",
-                "description": "Добавляет в карточку сделки кнопку, по клику на которую данные сделки отправляются в Google Таблицу",
-                "short_description": {
-                    "app": "Отправка сделки в Google Таблицу по кнопке"
-                }
-            }
-        },
-        "en": {
-            "widget": {
-                "name": "Send lead to sheet",
-                "description": "Adds a button to the lead card that sends the lead's data to a Google Sheet on click",
-                "short_description": {
-                    "app": "Send lead to Google Sheet on click"
-                }
-            }
+        "name": "widget.name",
+        "description": "widget.description",
+        "short_description": "widget.short_description",
+        "version": "1.0.2",
+        "interface_version": 2,
+        "init_once": true,
+        "locale": [
+            "ru",
+            "en"
+        ],
+        "installation": true,
+        "support": {
+            "link": "https://alladin-sheets-module.vercel.app",
+            "email": "rokkitstudio@gmail.com"
         }
     },
-    "version": "1.0.0"
+    "locations": [
+        "lcard-1"
+    ],
+    "settings": {
+        "endpoint_url": {
+            "name": "settings.endpoint_url",
+            "type": "text",
+            "required": true
+        }
+    },
+    "tour": {
+        "is_tour": true,
+        "tour_images": {
+            "ru": [
+                "/images/tour_1_ru.png",
+                "/images/tour_2_ru.png",
+                "/images/tour_3_ru.png"
+            ],
+            "en": [
+                "/images/tour_1_en.png",
+                "/images/tour_2_en.png",
+                "/images/tour_3_en.png"
+            ]
+        },
+        "tour_description": "widget.tour_description"
+    }
 }

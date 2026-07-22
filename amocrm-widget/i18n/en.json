@@ -2,9 +2,11 @@
     "widget": {
         "name": "Send lead to sheet",
         "description": "Adds a button to the lead card that sends the lead's data to a Google Sheet on click",
-        "short_description": {
-            "app": "Send lead to Google Sheet on click"
-        }
+        "short_description": "Send lead to Google Sheet on click",
+        "tour_description": "The widget adds a button to the lead card. Clicking it instantly sends all lead data to your Google Sheet."
+    },
+    "settings": {
+        "endpoint_url": "API endpoint URL, e.g. https://alladin-sheets-module.vercel.app/api/send-lead"
     },
     "button": {
         "send": "Send to sheet",

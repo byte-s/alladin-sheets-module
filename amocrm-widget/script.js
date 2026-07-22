@@ -2,9 +2,13 @@ define(['jquery'], function ($) {
     return function () {
         var self = this;
 
-        // Домен, на котором задеплоен модуль alladin-sheets-module.
-        // Поменяйте на реальный адрес после деплоя (например, https://alladin-sheets-module.vercel.app).
-        var ENDPOINT_URL = 'https://alladin-sheets-module.vercel.app/api/send-lead';
+        // Значение по умолчанию, если поле "Адрес API" не заполнено в настройках виджета.
+        var DEFAULT_ENDPOINT_URL = 'https://alladin-sheets-module.vercel.app/api/send-lead';
+
+        function getEndpointUrl() {
+            var settings = self.get_settings ? self.get_settings() : null;
+            return (settings && settings.endpoint_url) || DEFAULT_ENDPOINT_URL;
+        }
 
         function getLeadIdFromUrl() {
             var match = window.location.pathname.match(/\/leads\/detail\/(\d+)/);
@@ -40,7 +44,7 @@ define(['jquery'], function ($) {
 
             setButtonState('sending');
 
-            fetch(ENDPOINT_URL, {
+            fetch(getEndpointUrl(), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ leadId: leadId }),
@@ -61,26 +65,58 @@ define(['jquery'], function ($) {
                 });
         };
 
+        function injectButton() {
+            if ($('.sheet-sync-widget').length) {
+                return true;
+            }
+
+            var body =
+                '<div class="sheet-sync-widget">' +
+                '<button type="button" class="sheet-sync-widget__button button-input">' + self.i18n('button.send') + '</button>' +
+                '<div class="sheet-sync-widget__status"></div>' +
+                '</div>';
+
+            // Пытаемся встроиться в панель виджетов карточки (разные версии интерфейса amoCRM
+            // используют разную разметку, поэтому перебираем несколько известных контейнеров).
+            var candidates = [
+                '.card-widgets',
+                '.left-widgets',
+                '.widgets-side-block',
+                '.js-widgets-list',
+                '#panel_widgets',
+            ];
+
+            for (var i = 0; i < candidates.length; i++) {
+                var $container = $(candidates[i]);
+                if ($container.length) {
+                    $container.prepend(body);
+                    return true;
+                }
+            }
+
+            // Ни один известный контейнер не найден — показываем плавающую кнопку,
+            // чтобы функциональность всё равно была доступна.
+            $('body').append(
+                '<div class="sheet-sync-widget sheet-sync-widget--floating">' +
+                '<button type="button" class="sheet-sync-widget__button button-input">' + self.i18n('button.send') + '</button>' +
+                '<div class="sheet-sync-widget__status"></div>' +
+                '</div>'
+            );
+            return true;
+        }
+
         self.callbacks = {
             render: function () {
-                var body =
-                    '<div class="sheet-sync-widget">' +
-                    '<button type="button" class="sheet-sync-widget__button button-input">' + self.i18n('button.send') + '</button>' +
-                    '<div class="sheet-sync-widget__status"></div>' +
-                    '</div>';
-
-                self.render_template({
-                    caption: {
-                        class_name: '',
-                        name: self.i18n('widget.name'),
-                    },
-                    body: body,
-                });
-
+                // Само тело виджета не рендерим здесь через render_template (в текущей версии
+                // интерфейса это приводит к ошибке загрузки twig-шаблона) — кнопку вставляем
+                // напрямую в init/bind_actions.
                 return true;
             },
 
             init: function () {
+                injectButton();
+                setTimeout(injectButton, 500);
+                setTimeout(injectButton, 1500);
                 return true;
             },
 
@@ -119,6 +155,7 @@ define(['jquery'], function ($) {
 
             destroy: function () {
                 $(document).off('click', '.sheet-sync-widget__button', self.onButtonClick);
+                $('.sheet-sync-widget').remove();
                 return true;
             },
         };

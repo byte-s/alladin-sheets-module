@@ -2,9 +2,11 @@
     "widget": {
         "name": "Отправка сделки в таблицу",
         "description": "Добавляет в карточку сделки кнопку, по клику на которую данные сделки отправляются в Google Таблицу",
-        "short_description": {
-            "app": "Отправка сделки в Google Таблицу по кнопке"
-        }
+        "short_description": "Отправка сделки в Google Таблицу по кнопке",
+        "tour_description": "Виджет добавляет в карточку сделки кнопку, по нажатию на которую все данные сделки моментально отправляются в вашу Google Таблицу."
+    },
+    "settings": {
+        "endpoint_url": "Адрес API (endpoint), например https://alladin-sheets-module.vercel.app/api/send-lead"
     },
     "button": {
         "send": "Отправить в таблицу",
