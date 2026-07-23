@@ -119,59 +119,76 @@ export async function generateLeadDocuments(leadId: string): Promise<
     const leadFolderId = await findOrCreateFolder(leadId, ROOT_FOLDER_ID, token);
     const docsFolderId = await findOrCreateFolder('Документы', leadFolderId, token);
 
-    const mainMeta = await driveFetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${TEMPLATE_SHEET_ID}?fields=sheets(properties(sheetId,title))`,
+    // Повторная генерация по той же сделке обновляет уже существующий файл, а не
+    // плодит дубликаты — ищем "Документы <leadId>" в папке сделки по имени.
+    const docName = `Документы ${leadId}`;
+    const existingQ = encodeURIComponent(
+        `name='${docName.replace(/'/g, "\\'")}' and '${docsFolderId}' in parents and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`
+    );
+    const existing = await driveFetch(
+        `https://www.googleapis.com/drive/v3/files?q=${existingQ}&fields=files(id)&supportsAllDrives=true&includeItemsFromAllDrives=true`,
         token
     );
-    const sheetIdByTitle: Record<string, number> = {};
-    for (const s of mainMeta.sheets) {
-        sheetIdByTitle[s.properties.title] = s.properties.sheetId;
-    }
 
-    // Сервис-аккаунт не имеет собственной квоты диска, поэтому spreadsheets.create
-    // (создающий файл в "личном" Drive аккаунта) вернёт 403. Создаём файл сразу
-    // внутри расшаренной папки через Drive API — тогда используется её квота.
-    const created = await driveFetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true', token, {
-        method: 'POST',
-        body: JSON.stringify({
-            name: `Документы ${leadId}`,
-            mimeType: 'application/vnd.google-apps.spreadsheet',
-            parents: [docsFolderId],
-        }),
-    });
-    const newSpreadsheetId: string = created.id;
-    const newMeta = await driveFetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${newSpreadsheetId}?fields=sheets(properties(sheetId))`,
-        token
-    );
-    const placeholderSheetId: number = newMeta.sheets[0].properties.sheetId;
+    let newSpreadsheetId: string;
 
-    const copiedSheetIds: { title: string; sheetId: number }[] = [];
-    for (const tab of TEMPLATE_TABS) {
-        const sourceSheetId = sheetIdByTitle[tab];
-        if (sourceSheetId === undefined) continue;
-        const copyResult = await driveFetch(
-            `https://sheets.googleapis.com/v4/spreadsheets/${TEMPLATE_SHEET_ID}/sheets/${sourceSheetId}:copyTo`,
-            token,
-            { method: 'POST', body: JSON.stringify({ destinationSpreadsheetId: newSpreadsheetId }) }
+    if (existing.files && existing.files.length > 0) {
+        newSpreadsheetId = existing.files[0].id;
+    } else {
+        const mainMeta = await driveFetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${TEMPLATE_SHEET_ID}?fields=sheets(properties(sheetId,title))`,
+            token
         );
-        copiedSheetIds.push({ title: tab, sheetId: copyResult.sheetId });
-    }
+        const sheetIdByTitle: Record<string, number> = {};
+        for (const s of mainMeta.sheets) {
+            sheetIdByTitle[s.properties.title] = s.properties.sheetId;
+        }
 
-    await driveFetch(`https://sheets.googleapis.com/v4/spreadsheets/${newSpreadsheetId}:batchUpdate`, token, {
-        method: 'POST',
-        body: JSON.stringify({
-            requests: [
-                ...copiedSheetIds.map((s) => ({
-                    updateSheetProperties: {
-                        properties: { sheetId: s.sheetId, title: s.title },
-                        fields: 'title',
-                    },
-                })),
-                { deleteSheet: { sheetId: placeholderSheetId } },
-            ],
-        }),
-    });
+        // Сервис-аккаунт не имеет собственной квоты диска, поэтому spreadsheets.create
+        // (создающий файл в "личном" Drive аккаунта) вернёт 403. Создаём файл сразу
+        // внутри расшаренной папки через Drive API — тогда используется её квота.
+        const created = await driveFetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true', token, {
+            method: 'POST',
+            body: JSON.stringify({
+                name: docName,
+                mimeType: 'application/vnd.google-apps.spreadsheet',
+                parents: [docsFolderId],
+            }),
+        });
+        newSpreadsheetId = created.id;
+        const newMeta = await driveFetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${newSpreadsheetId}?fields=sheets(properties(sheetId))`,
+            token
+        );
+        const placeholderSheetId: number = newMeta.sheets[0].properties.sheetId;
+
+        const copiedSheetIds: { title: string; sheetId: number }[] = [];
+        for (const tab of TEMPLATE_TABS) {
+            const sourceSheetId = sheetIdByTitle[tab];
+            if (sourceSheetId === undefined) continue;
+            const copyResult = await driveFetch(
+                `https://sheets.googleapis.com/v4/spreadsheets/${TEMPLATE_SHEET_ID}/sheets/${sourceSheetId}:copyTo`,
+                token,
+                { method: 'POST', body: JSON.stringify({ destinationSpreadsheetId: newSpreadsheetId }) }
+            );
+            copiedSheetIds.push({ title: tab, sheetId: copyResult.sheetId });
+        }
+
+        await driveFetch(`https://sheets.googleapis.com/v4/spreadsheets/${newSpreadsheetId}:batchUpdate`, token, {
+            method: 'POST',
+            body: JSON.stringify({
+                requests: [
+                    ...copiedSheetIds.map((s) => ({
+                        updateSheetProperties: {
+                            properties: { sheetId: s.sheetId, title: s.title },
+                            fields: 'title',
+                        },
+                    })),
+                    { deleteSheet: { sheetId: placeholderSheetId } },
+                ],
+            }),
+        });
+    }
 
     const valueRanges = [] as { range: string; values: string[][] }[];
     for (const tab of TEMPLATE_TABS) {
