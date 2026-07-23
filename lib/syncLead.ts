@@ -7,12 +7,13 @@ import { getContact, getPipeline, getStatus, getUser } from '@/lib/db';
 import { fromUnixTime, format } from 'date-fns';
 import { TZDate } from '@date-fns/tz';
 
-const SHEET_ID = '1TRevNsY_rlLxJf4pUqAFTKOuT1esw4ogpY6Os-bknNw';
+// Боевая таблица (реальный учёт, с зарплатными и другими вкладками).
+export const SHEET_ID = '1XHC6r7sFo-yDCq6RPKJzI4OMsoR6USy9MTimAefPzWw';
 
 // В проде ключ приходит из переменной окружения (не коммитим секреты в git).
 // Локально для удобства разработки можно держать файл quiet-dryad-creds.json
 // в корне проекта — он в .gitignore и никогда не попадёт в репозиторий.
-function loadGoogleCredentials(): { client_email: string; private_key: string } {
+export function loadGoogleCredentials(): { client_email: string; private_key: string } {
     const envJson = process.env.GOOGLE_SHEETS_CREDS_JSON;
     if (envJson) {
         return JSON.parse(envJson);
@@ -206,31 +207,47 @@ const DATE_FIELD_MAP: Record<string, keyof AmoExport> = {
     'Дата возврата': 'return_date',
 };
 
-export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; message: string }> {
-    if (!leadId) {
-        return { ok: false, message: 'Не передан ID сделки' };
+// Основные (не кастомные) поля сделки — их русские подписи в боевой таблице.
+const CORE_FIELD_LABELS: Record<string, keyof AmoExport> = {
+    'Ссылка на сделку': 'link',
+    'Дата создания': 'created_at',
+    'Месяц сделки': 'lead_month',
+    'Менеджер': 'manager',
+    'Имя клиента': 'client_name',
+    'Наименование сделки': 'lead_name',
+    'Статус': 'status',
+    'Телефон': 'phone',
+    'Бюджет': 'budget',
+    'Дата синхр': 'sync_date',
+    'Воронка': 'funnel_stage',
+};
+
+function normalizeHeader(s: string): string {
+    return (s || '').replace(/\s+/g, ' ').trim();
+}
+
+// Заголовок таблицы — источник истины для того, в какую колонку что писать.
+// Строится один раз: английские ключи (для служебной/тестовой таблицы, где
+// заголовки — это сами ключи AmoExport) + русские подписи (для боевой таблицы).
+const REVERSE_FIELD_MAP: Record<string, keyof AmoExport> = (() => {
+    const map: Record<string, keyof AmoExport> = {};
+    for (const key of Object.keys(emptyRow()) as (keyof AmoExport)[]) {
+        map[key] = key;
     }
+    for (const [label, key] of Object.entries(CUSTOM_FIELD_MAP)) {
+        map[normalizeHeader(label)] = key;
+    }
+    for (const [label, key] of Object.entries(DATE_FIELD_MAP)) {
+        map[normalizeHeader(label)] = key;
+    }
+    for (const [label, key] of Object.entries(CORE_FIELD_LABELS)) {
+        map[normalizeHeader(label)] = key;
+    }
+    return map;
+})();
 
+export async function buildLeadRow(leadId: string): Promise<{ tableRow: AmoExport; resBody: Lead } | null> {
     const tableRow = emptyRow();
-
-    const SCOPES = [
-        'https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive.file',
-    ];
-
-    const creds = loadGoogleCredentials();
-
-    const jwt = new JWT({
-        email: creds.client_email,
-        key: creds.private_key,
-        scopes: SCOPES,
-    });
-
-    const doc = new GoogleSpreadsheet(SHEET_ID, jwt);
-    await doc.loadInfo();
-    const sheet = doc.sheetsByIndex[0];
-    const rows = await sheet.getRows();
-    sheet.setHeaderRow(Object.keys(tableRow));
 
     const response = await fetch('https://mfalladin55.amocrm.ru/api/v4/leads/' + leadId + '?with=contacts', {
         method: 'GET',
@@ -241,7 +258,7 @@ export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; me
     });
 
     if (!response.ok) {
-        return { ok: false, message: 'Не успех' };
+        return null;
     }
 
     const resBody: Lead = await response.json();
@@ -304,20 +321,64 @@ export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; me
         }
     });
 
+    return { tableRow, resBody };
+}
+
+export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; message: string }> {
+    if (!leadId) {
+        return { ok: false, message: 'Не передан ID сделки' };
+    }
+
+    const built = await buildLeadRow(leadId);
+    if (!built) {
+        return { ok: false, message: 'Не успех' };
+    }
+    const { tableRow, resBody } = built;
+
+    const SCOPES = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive.file',
+    ];
+
+    const creds = loadGoogleCredentials();
+
+    const jwt = new JWT({
+        email: creds.client_email,
+        key: creds.private_key,
+        scopes: SCOPES,
+    });
+
+    const doc = new GoogleSpreadsheet(SHEET_ID, jwt);
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0];
+
+    // Заголовок таблицы никогда не перезаписываем — в боевой таблице от порядка
+    // и текста колонок зависят формулы в других вкладках. Читаем его как есть
+    // и по нему сопоставляем поля с колонками, а не по фиксированной позиции.
+    await sheet.loadHeaderRow();
+    const rows = await sheet.getRows();
+
+    const rowByHeader: Record<string, string | number> = {};
+    for (const header of sheet.headerValues) {
+        const fieldKey = REVERSE_FIELD_MAP[normalizeHeader(header)];
+        if (!fieldKey) continue;
+        rowByHeader[header] = tableRow[fieldKey] ?? '';
+    }
+
     let isExist = false;
 
     for (const f of rows) {
-        if (f.toObject().ID == resBody.id) {
+        if (f.get('ID') == resBody.id) {
             isExist = true;
-            for (const key in tableRow) {
-                f.set(key, tableRow[key as keyof typeof tableRow] || '');
+            for (const [header, value] of Object.entries(rowByHeader)) {
+                f.set(header, value);
             }
             await f.save();
         }
     }
 
     if (!isExist) {
-        const addRow = await sheet.addRow(Object.values(tableRow));
+        const addRow = await sheet.addRow(rowByHeader);
         return addRow
             ? { ok: true, message: 'Успех' }
             : { ok: false, message: 'Не успех' };

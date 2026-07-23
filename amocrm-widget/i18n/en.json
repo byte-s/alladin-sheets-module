@@ -6,12 +6,17 @@
         "tour_description": "The widget adds a button to the lead card. Clicking it instantly sends all lead data to your Google Sheet."
     },
     "settings": {
-        "endpoint_url": "API endpoint URL, e.g. https://alladin-sheets-module.vercel.app/api/send-lead"
+        "endpoint_url": "API endpoint URL, e.g. https://alladin-sheets-module.vercel.app/api/send-lead",
+        "generate_endpoint_url": "Document generation API endpoint URL, e.g. https://alladin-sheets-module.vercel.app/api/generate-docs"
     },
     "button": {
         "send": "Send to sheet",
         "sending": "Sending...",
         "success": "Sent",
-        "error": "Send failed"
+        "error": "Send failed",
+        "generate": "Generate documents",
+        "generating": "Generating...",
+        "generate_success": "Documents generated",
+        "generate_error": "Generation failed"
     }
 }

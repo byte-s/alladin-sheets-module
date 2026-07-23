@@ -6,12 +6,17 @@
         "tour_description": "Виджет добавляет в карточку сделки кнопку, по нажатию на которую все данные сделки моментально отправляются в вашу Google Таблицу."
     },
     "settings": {
-        "endpoint_url": "Адрес API (endpoint), например https://alladin-sheets-module.vercel.app/api/send-lead"
+        "endpoint_url": "Адрес API (endpoint), например https://alladin-sheets-module.vercel.app/api/send-lead",
+        "generate_endpoint_url": "Адрес API для формирования документов, например https://alladin-sheets-module.vercel.app/api/generate-docs"
     },
     "button": {
         "send": "Отправить в таблицу",
         "sending": "Отправка...",
         "success": "Отправлено",
-        "error": "Ошибка отправки"
+        "error": "Ошибка отправки",
+        "generate": "Сформировать документы",
+        "generating": "Формирование...",
+        "generate_success": "Документы сформированы",
+        "generate_error": "Ошибка формирования"
     }
 }

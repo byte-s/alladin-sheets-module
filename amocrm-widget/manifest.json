@@ -3,7 +3,7 @@
         "name": "widget.name",
         "description": "widget.description",
         "short_description": "widget.short_description",
-        "version": "1.0.2",
+        "version": "1.1.0",
         "interface_version": 2,
         "init_once": true,
         "locale": [
@@ -24,6 +24,11 @@
             "name": "settings.endpoint_url",
             "type": "text",
             "required": true
+        },
+        "generate_endpoint_url": {
+            "name": "settings.generate_endpoint_url",
+            "type": "text",
+            "required": false
         }
     },
     "tour": {
