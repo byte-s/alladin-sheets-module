@@ -194,7 +194,10 @@ export interface AmoExport {
     return_notes: string,
     textile_footage_comp: string,
     surcharge_comment: string,
-    return_formula: string
+    return_formula: string,
+    client_email: string,
+    application_number: string,
+    piping_color: string,
 }
 
 export interface Data {

@@ -4,10 +4,10 @@ import { getGoogleOAuthAccessToken } from '@/lib/googleOAuth';
 
 const ROOT_FOLDER_ID = '1tDrlAxZJYi0CTl3LieZwyocNj6BZ3p6J';
 
-// Шаблоны документов (Договор заказа и т.д.) живут в отдельной, старой таблице —
+// Шаблоны документов (Договор заказа и т.д.) живут в отдельной таблице —
 // в боевой их нет. Это специально не совпадает с syncLead.SHEET_ID (боевая таблица,
 // куда пишутся строки сделок): источники разные, путать их нельзя.
-const TEMPLATE_SHEET_ID = '1TRevNsY_rlLxJf4pUqAFTKOuT1esw4ogpY6Os-bknNw';
+const TEMPLATE_SHEET_ID = '1d254aRG3bxuUSsL9JrSqPhOzqewI78jAxr384JepP_M';
 
 const TEMPLATE_TABS = [
     'Договор заказ',
@@ -18,57 +18,52 @@ const TEMPLATE_TABS = [
     'акт приема передачи',
 ] as const;
 
-// Ячейки-плейсхолдеры восстановлены сверкой пустых шаблонов с уже сгенерированными
-// документами по реальным сделкам. Часть редких/неоднозначных ячеек (например,
-// разбивка платежей по разным датам) не покрыта и остаётся пустой в новых документах.
+// Ячейки-плейсхолдеры в шаблонах — это формулы вида "=Data!AG2", которые в исходной
+// таблице подтягивают значение из служебного листа "Data" (= зеркало листа "Исходные").
+// Лист "Data" в скопированный документ не переносится, поэтому такие формулы всегда
+// дают #REF!, если их не заменить на литеральное значение. Карта ниже восстановлена
+// прямым разбором формул всех 6 вкладок исходной таблицы (сверка Data!<ячейка> ->
+// заголовок листа "Исходные" -> ключ AmoExport), а не подбором вручную.
 const TEMPLATE_FIELD_MAP: Record<string, Record<string, keyof AmoExport>> = {
     'Договор заказ': {
-        F1: 'contract_number', I4: 'created_at', G7: 'client_name', D28: 'deal_place',
-        H213: 'client_name', H214: 'delivery_address', H216: 'phone', B227: 'manager',
-        E259: 'contract_number', G259: 'created_at', E265: 'sofa_model', E266: 'corner',
-        E267: 'mechanism', E268: 'seat_base', E269: 'compaion', E270: 'armrests',
-        E271: 'inserts', E272: 'pillows', E273: 'stitching_color', E274: 'additional_options',
-        E275: 'client_name', E276: 'delivery_address', E277: 'phone', E278: 'budget',
-        E279: 'prepayment_amount', E280: 'balance', E283: 'rise_price', E284: 'floor',
-        H290: 'created_at',
+        F1: 'contract_number', I4: 'pay_date', G7: 'client_name', D28: 'deal_place',
+        H213: 'client_name', H214: 'delivery_address', H216: 'phone', H217: 'client_email',
+        B227: 'manager', E259: 'contract_number', G259: 'pay_date', E265: 'sofa_model',
+        E266: 'corner', E267: 'mechanism', E268: 'seat_base', E269: 'compaion',
+        E270: 'armrests', E271: 'inserts', E272: 'pillows', E273: 'piping_color',
+        E274: 'stitching_color', E275: 'client_name', E276: 'delivery_address', E277: 'phone',
+        E278: 'budget', E279: 'prepayment_amount', E280: 'balance', E281: 'delivery_date',
+        E282: 'delivery_cost', E283: 'rise_price', E284: 'floor', H290: 'pay_date',
     },
     'Договор витрина': {
-        F1: 'contract_number', I4: 'created_at', G7: 'client_name', D28: 'deal_place',
-        H213: 'client_name', H214: 'delivery_address', H216: 'phone', B227: 'manager',
-        I238: 'contract_number', I239: 'created_at', C243: 'client_name', H243: 'phone',
-        C245: 'delivery_address', G247: 'rise_price', I247: 'floor', D252: 'sofa_model',
-        H252: 'budget', D253: 'corner', D254: 'mechanism', D255: 'seat_base', D256: 'compaion',
-        B261: 'created_at', D261: 'prepayment_amount', F261: 'balance', E263: 'manager',
+        F1: 'contract_number', I4: 'pay_date', G7: 'client_name', D28: 'deal_place',
+        H213: 'client_name', H214: 'delivery_address', H216: 'phone', H217: 'client_email',
+        B227: 'manager', I238: 'contract_number', I239: 'pay_date', C243: 'client_name',
+        H243: 'phone', C245: 'delivery_address', H245: 'delivery_date', D247: 'delivery_cost',
+        G247: 'rise_price', I247: 'floor', D252: 'sofa_model', H252: 'budget', D253: 'corner',
+        D254: 'mechanism', D255: 'seat_base', D256: 'compaion', B261: 'pay_date',
+        D261: 'prepayment_amount', F261: 'balance', E263: 'manager',
     },
     'Договор перетяжка': {
-        G1: 'contract_number', J3: 'created_at', B7: 'client_name', H30: 'budget',
+        G1: 'contract_number', J3: 'pay_date', B7: 'client_name', H30: 'budget',
         F34: 'prepayment_amount', H140: 'client_name', H141: 'delivery_address',
-        H143: 'phone', B154: 'manager',
+        H143: 'phone', H144: 'client_email', B154: 'manager',
     },
     'Маркировки': {
-        C2: 'sofa_model', H2: 'sofa_model', C4: 'additional_options', H4: 'additional_options',
-        C6: 'seat_base', H6: 'seat_base', C12: 'delivery_address', H12: 'delivery_address',
-        C16: 'sofa_model', H16: 'sofa_model', C18: 'additional_options', H18: 'additional_options',
-        C20: 'seat_base', H20: 'seat_base', C26: 'delivery_address', H26: 'delivery_address',
-        C30: 'sofa_model', H30: 'sofa_model', C32: 'additional_options', H32: 'additional_options',
-        C34: 'seat_base', H34: 'seat_base', C40: 'delivery_address', H40: 'delivery_address',
-        C44: 'sofa_model', H44: 'sofa_model', C46: 'additional_options', H46: 'additional_options',
-        C48: 'seat_base', H48: 'seat_base', C54: 'delivery_address', H54: 'delivery_address',
-        C67: 'sofa_model', H67: 'sofa_model', C69: 'additional_options', H69: 'additional_options',
-        C71: 'seat_base', H71: 'seat_base', C77: 'delivery_address', H77: 'delivery_address',
-        C81: 'sofa_model', H81: 'sofa_model', C83: 'additional_options', H83: 'additional_options',
-        C85: 'seat_base', H85: 'seat_base', C91: 'delivery_address', H91: 'delivery_address',
-        D102: 'sofa_model',
+        C2: 'sofa_model', C4: 'stitching_color', C6: 'seat_base', C8: 'sofa_number',
+        C10: 'remark', C12: 'delivery_address', C14: 'wholesaler', F14: 'seats_quantity',
+        D102: 'sofa_model', D104: 'expected_sofa_done', D105: 'sofa_number',
     },
     'Талон доставки': {
-        G9: 'application_date', G13: 'created_at', G15: 'delivery_address', G18: 'phone',
-        G22: 'sofa_model', G24: 'additional_options', G26: 'corner', G28: 'mechanism',
-        G30: 'seat_base', G32: 'compaion', G34: 'prepayment_amount', G36: 'balance',
-        G40: 'rise_price', G42: 'floor', G44: 'client_name',
+        G9: 'application_number', G11: 'delivery_date', G13: 'pay_date', G15: 'delivery_address',
+        G18: 'phone', G20: 'sofa_number', G22: 'sofa_model', G24: 'stitching_color',
+        G26: 'corner', G28: 'mechanism', G30: 'seat_base', G32: 'compaion',
+        G34: 'prepayment_amount', G36: 'balance', G38: 'delivery_cost', G40: 'rise_price',
+        G42: 'floor', G44: 'client_name',
     },
     'акт приема передачи': {
-        B3: 'created_at', B5: 'client_name', B7: 'delivery_address', B9: 'phone',
-        A16: 'sofa_model', E16: 'additional_options',
+        B3: 'pay_date', B5: 'client_name', B7: 'delivery_address', B9: 'phone',
+        A16: 'sofa_model', E16: 'stitching_color',
     },
 };
 
@@ -183,9 +178,13 @@ export async function generateLeadDocuments(leadId: string): Promise<
         const cellMap = TEMPLATE_FIELD_MAP[tab];
         if (!cellMap) continue;
         for (const [cell, field] of Object.entries(cellMap)) {
+            // Каждая из этих ячеек в шаблоне — формула "=Data!..." (см. комментарий у
+            // TEMPLATE_FIELD_MAP). Лист Data не копируется, поэтому пишем сюда всегда,
+            // даже пустую строку — иначе при пустом значении поля формула-ссылка
+            // останется как есть и превратится в #REF!.
             const value = tableRow[field];
-            if (value === undefined || value === null || value === '') continue;
-            valueRanges.push({ range: `'${tab}'!${cell}`, values: [[String(value)]] });
+            const stringValue = value === undefined || value === null ? '' : String(value);
+            valueRanges.push({ range: `'${tab}'!${cell}`, values: [[stringValue]] });
         }
     }
 

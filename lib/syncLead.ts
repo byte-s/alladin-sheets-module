@@ -57,7 +57,8 @@ function emptyRow(): AmoExport {
         textile_issued_2: '', wholesaler_accontert: '', virtual_number: '', fio_pickup_driver: '',
         removal_date: '', surcharge_amount: '', otk_date: '', passport_data: '', notes: '',
         fio_accountant: '', return_date: '', return_notes: '', textile_footage_comp: '',
-        surcharge_comment: '', return_formula: ''
+        surcharge_comment: '', return_formula: '', client_email: '', application_number: '',
+        piping_color: '',
     };
 }
 
@@ -101,6 +102,8 @@ const CUSTOM_FIELD_MAP: Record<string, keyof AmoExport> = {
     'Стоимость работы (обивщик)(Р)': 'upholsterer_work_cost',
     'Кол-во мест': 'seats_quantity',
     'Принял ОТК': 'otk_accepted',
+    'Номер заявки': 'application_number',
+    'Отстрочка (цвет)': 'piping_color',
     'Примечание': 'remark',
     'Подъем на этаж': 'rise_to_floor',
     'Этаж': 'floor',
@@ -282,11 +285,17 @@ export async function buildLeadRow(leadId: string): Promise<{ tableRow: AmoExpor
     }
 
     let phoneNumber;
+    let emailAddress;
     if (contactname != null) {
         contactname.custom_fields_values.map((a) => {
             if (a.field_code == 'PHONE') {
                 a.values.map((c) => {
                     phoneNumber = c.value;
+                });
+            }
+            if (a.field_code == 'EMAIL') {
+                a.values.map((c) => {
+                    emailAddress = c.value;
                 });
             }
         });
@@ -301,6 +310,7 @@ export async function buildLeadRow(leadId: string): Promise<{ tableRow: AmoExpor
     tableRow.lead_name = resBody.name;
     tableRow.status = statusname || '';
     tableRow.phone = phoneNumber || '';
+    tableRow.client_email = emailAddress || '';
     tableRow.budget = resBody.price;
     tableRow.sync_date = format(new Date(), 'dd/MM/yyyy');
     tableRow.funnel_stage = piplinename || '';
