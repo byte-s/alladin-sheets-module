@@ -133,6 +133,12 @@ define(['jquery'], function ($) {
             },
 
             bind_actions: function () {
+                // amoCRM может вызывать bind_actions повторно без destroy (например, при
+                // повторном рендере карточки) — сперва снимаем старый обработчик, иначе
+                // на кнопке накапливается несколько обработчиков и один клик шлёт
+                // несколько параллельных запросов (это приводило к дублям строк в таблице).
+                $(document).off('click', '.sheet-sync-widget__button--sync', self.onSyncButtonClick);
+                $(document).off('click', '.sheet-sync-widget__button--generate', self.onGenerateButtonClick);
                 $(document).on('click', '.sheet-sync-widget__button--sync', self.onSyncButtonClick);
                 $(document).on('click', '.sheet-sync-widget__button--generate', self.onGenerateButtonClick);
                 return true;
