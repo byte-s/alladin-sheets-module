@@ -42,18 +42,34 @@ function amoAuthHeaders() {
     };
 }
 
+// Имена пользователей, воронок и статусов почти никогда не меняются, но
+// buildLeadRow запрашивает их заново на каждую сделку. Когда amoCRM шлёт
+// пачку сделок подряд (например, автоматизация на статус "Успешно
+// реализовано" по многим сделкам за раз), это превращается в десятки
+// одинаковых запросов и упирается в лимит API. Кэшируем на процесс.
+const CACHE_TTL_MS = 10 * 60 * 1000;
+const nameCache = new Map<string, { value: string; expiresAt: number }>();
+
+async function getCachedName(cacheKey: string, url: string): Promise<string> {
+    const cached = nameCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+        return cached.value;
+    }
+    const response = await fetch(url, {
+        method: "GET",
+        headers: amoAuthHeaders(),
+    });
+    if (!response.ok) {
+        return '';
+    }
+    const value = ((await response.json()) as Data).name;
+    nameCache.set(cacheKey, { value, expiresAt: Date.now() + CACHE_TTL_MS });
+    return value;
+}
+
 export async function getUser(id:string){
     if(id){
-        const response = await fetch('https://mfalladin55.amocrm.ru/api/v4/users/'+id,{
-            method: "GET",
-            headers: amoAuthHeaders(),
-        });
-        if(response.ok){
-            const resBody:Data = await response.json();
-            return resBody.name;
-        } else{
-            return '';
-        }
+        return getCachedName('user:' + id, 'https://mfalladin55.amocrm.ru/api/v4/users/' + id);
     } else{
         return '';
     }
@@ -79,16 +95,10 @@ export async function getContact(id:string){
 
 export async function getStatus(pipeline_id:string, id:string){
     if(pipeline_id && id){
-        const response = await fetch('https://mfalladin55.amocrm.ru/api/v4/leads/pipelines/'+pipeline_id+'/statuses/'+id,{
-            method: "GET",
-            headers: amoAuthHeaders(),
-        });
-        if(response.ok){
-            const resBody:Data = await response.json();
-            return resBody.name;
-        } else{
-            return '';
-        }
+        return getCachedName(
+            'status:' + pipeline_id + ':' + id,
+            'https://mfalladin55.amocrm.ru/api/v4/leads/pipelines/' + pipeline_id + '/statuses/' + id
+        );
     } else{
         return '';
     }
@@ -97,16 +107,7 @@ export async function getStatus(pipeline_id:string, id:string){
 
 export async function getPipeline(id:string){
     if(id){
-        const response = await fetch('https://mfalladin55.amocrm.ru/api/v4/leads/pipelines/'+id,{
-            method: "GET",
-            headers: amoAuthHeaders(),
-        });
-        if(response.ok){
-            const resBody:Data = await response.json();
-            return resBody.name;
-        } else{
-            return '';
-        }
+        return getCachedName('pipeline:' + id, 'https://mfalladin55.amocrm.ru/api/v4/leads/pipelines/' + id);
     } else{
         return '';
     }
