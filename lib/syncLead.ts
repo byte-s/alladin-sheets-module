@@ -1,4 +1,4 @@
-import { GoogleSpreadsheet } from 'google-spreadsheet';
+import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 import fs from 'fs';
 import path from 'path';
@@ -334,16 +334,19 @@ export async function buildLeadRow(leadId: string): Promise<{ tableRow: AmoExpor
     return { tableRow, resBody };
 }
 
-export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; message: string }> {
-    if (!leadId) {
-        return { ok: false, message: 'Не передан ID сделки' };
-    }
+// Google Sheets API даёт по умолчанию только 60 read-запросов в минуту на
+// сервис-аккаунт. doc.loadInfo() и sheet.loadHeaderRow() читают одни и те же,
+// практически неизменные данные на каждый вызов syncLeadToSheet — когда amoCRM
+// присылает вебхуки пачкой (много сделок подряд), это упирается в лимит и
+// начинает падать 429-ми. Держим уже загруженный лист в памяти процесса, чтобы
+// пачка вызовов на одном тёплом инстансе не тратила квоту повторно.
+const SHEET_CACHE_TTL_MS = 5 * 60 * 1000;
+let cachedSheet: { sheet: GoogleSpreadsheetWorksheet; loadedAt: number } | null = null;
 
-    const built = await buildLeadRow(leadId);
-    if (!built) {
-        return { ok: false, message: 'Не успех' };
+async function getProductionSheet() {
+    if (cachedSheet && Date.now() - cachedSheet.loadedAt < SHEET_CACHE_TTL_MS) {
+        return cachedSheet.sheet;
     }
-    const { tableRow, resBody } = built;
 
     const SCOPES = [
         'https://www.googleapis.com/auth/spreadsheets',
@@ -361,11 +364,28 @@ export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; me
     const doc = new GoogleSpreadsheet(SHEET_ID, jwt);
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
+    await sheet.loadHeaderRow();
+
+    cachedSheet = { sheet, loadedAt: Date.now() };
+    return sheet;
+}
+
+export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; message: string }> {
+    if (!leadId) {
+        return { ok: false, message: 'Не передан ID сделки' };
+    }
+
+    const built = await buildLeadRow(leadId);
+    if (!built) {
+        return { ok: false, message: 'Не успех' };
+    }
+    const { tableRow, resBody } = built;
 
     // Заголовок таблицы никогда не перезаписываем — в боевой таблице от порядка
-    // и текста колонок зависят формулы в других вкладках. Читаем его как есть
-    // и по нему сопоставляем поля с колонками, а не по фиксированной позиции.
-    await sheet.loadHeaderRow();
+    // и текста колонок зависят формулы в других вкладках. Сопоставляем поля с
+    // колонками по заголовку (уже загружен в getProductionSheet), а не по
+    // фиксированной позиции.
+    const sheet = await getProductionSheet();
     const rows = await sheet.getRows();
 
     const rowByHeader: Record<string, string | number> = {};

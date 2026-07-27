@@ -14,7 +14,15 @@ export async function POST(request: Request) {
         formDataValues.push(value.toString());
     }
 
-    const result = await syncLeadToSheet(formDataValues[0]);
-
-    return Response.json({ text: result.message });
+    try {
+        const result = await syncLeadToSheet(formDataValues[0]);
+        return Response.json({ text: result.message });
+    } catch (err) {
+        // Этот эндпоинт дёргает amoCRM-автоматизация по вебхуку — если отдать сюда
+        // голый 500 (например, из-за временного 429 от Google Sheets при всплеске
+        // запросов), amoCRM начинает ретраить и только усиливает всплеск. Отвечаем
+        // 200 в любом случае, ошибку просто логируем.
+        console.error('syncLeadToSheet failed', err);
+        return Response.json({ text: 'Ошибка синхронизации, см. логи сервера' });
+    }
 }
