@@ -370,6 +370,21 @@ async function getProductionSheet() {
     return sheet;
 }
 
+// Проверка "есть ли уже такая строка" и добавление новой — это read-then-write:
+// между getRows() и addRow() нет атомарности на стороне Sheets API. Раньше это
+// маскировалось тем, что при пачке вебхуков большинство запросов падало на 429
+// ещё до этого места. После кэширования листа и устранения 429 запросы стали
+// успешно доходить досюда параллельно — и два вызова для одного и того же лида
+// оба видели "строки нет" и оба добавляли новую. Сериализуем этот участок в
+// пределах одного тёплого инстанса, чтобы гонка не повторялась.
+let sheetLock: Promise<void> = Promise.resolve();
+
+function withSheetLock<T>(fn: () => Promise<T>): Promise<T> {
+    const result = sheetLock.then(fn, fn);
+    sheetLock = result.then(() => undefined, () => undefined);
+    return result;
+}
+
 export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; message: string }> {
     if (!leadId) {
         return { ok: false, message: 'Не передан ID сделки' };
@@ -381,38 +396,40 @@ export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; me
     }
     const { tableRow, resBody } = built;
 
-    // Заголовок таблицы никогда не перезаписываем — в боевой таблице от порядка
-    // и текста колонок зависят формулы в других вкладках. Сопоставляем поля с
-    // колонками по заголовку (уже загружен в getProductionSheet), а не по
-    // фиксированной позиции.
-    const sheet = await getProductionSheet();
-    const rows = await sheet.getRows();
+    return withSheetLock(async () => {
+        // Заголовок таблицы никогда не перезаписываем — в боевой таблице от порядка
+        // и текста колонок зависят формулы в других вкладках. Сопоставляем поля с
+        // колонками по заголовку (уже загружен в getProductionSheet), а не по
+        // фиксированной позиции.
+        const sheet = await getProductionSheet();
+        const rows = await sheet.getRows();
 
-    const rowByHeader: Record<string, string | number> = {};
-    for (const header of sheet.headerValues) {
-        const fieldKey = REVERSE_FIELD_MAP[normalizeHeader(header)];
-        if (!fieldKey) continue;
-        rowByHeader[header] = tableRow[fieldKey] ?? '';
-    }
-
-    let isExist = false;
-
-    for (const f of rows) {
-        if (f.get('ID') == resBody.id) {
-            isExist = true;
-            for (const [header, value] of Object.entries(rowByHeader)) {
-                f.set(header, value);
-            }
-            await f.save();
+        const rowByHeader: Record<string, string | number> = {};
+        for (const header of sheet.headerValues) {
+            const fieldKey = REVERSE_FIELD_MAP[normalizeHeader(header)];
+            if (!fieldKey) continue;
+            rowByHeader[header] = tableRow[fieldKey] ?? '';
         }
-    }
 
-    if (!isExist) {
-        const addRow = await sheet.addRow(rowByHeader);
-        return addRow
-            ? { ok: true, message: 'Успех' }
-            : { ok: false, message: 'Не успех' };
-    }
+        let isExist = false;
 
-    return { ok: true, message: 'Успех, значение обновлено' };
+        for (const f of rows) {
+            if (f.get('ID') == resBody.id) {
+                isExist = true;
+                for (const [header, value] of Object.entries(rowByHeader)) {
+                    f.set(header, value);
+                }
+                await f.save();
+            }
+        }
+
+        if (!isExist) {
+            const addRow = await sheet.addRow(rowByHeader);
+            return addRow
+                ? { ok: true, message: 'Успех' }
+                : { ok: false, message: 'Не успех' };
+        }
+
+        return { ok: true, message: 'Успех, значение обновлено' };
+    });
 }
