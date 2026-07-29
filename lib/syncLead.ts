@@ -340,6 +340,32 @@ export async function buildLeadRow(leadId: string): Promise<{ tableRow: AmoExpor
 // присылает вебхуки пачкой (много сделок подряд), это упирается в лимит и
 // начинает падать 429-ми. Держим уже загруженный лист в памяти процесса, чтобы
 // пачка вызовов на одном тёплом инстансе не тратила квоту повторно.
+//
+// Кэш не спасает от пачки, если Vercel поднимает под неё несколько отдельных
+// (холодных) инстансов параллельно — у каждого своя копия кэша, и все они всё
+// равно бьют в лимит одновременно. Библиотека google-spreadsheet/gaxios сама
+// ретраит 429, но с задержками в доли секунды — против лимита "в минуту" это
+// бесполезно. Добавляем свой retry с задержками в секунды и джиттером, чтобы
+// разнести параллельные попытки во времени и дать окну квоты обновиться.
+async function withRetry429<T>(fn: () => Promise<T>, label: string): Promise<T> {
+    const baseDelaysMs = [5000, 15000, 30000, 60000];
+    for (let attempt = 0; ; attempt++) {
+        try {
+            return await fn();
+        } catch (err) {
+            const status = (err as { response?: { status?: number } })?.response?.status;
+            const message = err instanceof Error ? err.message : String(err);
+            const isQuotaError = status === 429 || message.includes('429') || message.includes('Quota exceeded');
+            if (!isQuotaError || attempt >= baseDelaysMs.length) {
+                throw err;
+            }
+            const delay = baseDelaysMs[attempt] * (0.5 + Math.random());
+            console.warn(`${label}: 429 от Sheets API, повтор через ${Math.round(delay)}мс (попытка ${attempt + 1})`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+    }
+}
+
 const SHEET_CACHE_TTL_MS = 5 * 60 * 1000;
 let cachedSheet: { sheet: GoogleSpreadsheetWorksheet; loadedAt: number } | null = null;
 
@@ -362,9 +388,9 @@ async function getProductionSheet() {
     });
 
     const doc = new GoogleSpreadsheet(SHEET_ID, jwt);
-    await doc.loadInfo();
+    await withRetry429(() => doc.loadInfo(), 'doc.loadInfo');
     const sheet = doc.sheetsByIndex[0];
-    await sheet.loadHeaderRow();
+    await withRetry429(() => sheet.loadHeaderRow(), 'sheet.loadHeaderRow');
 
     cachedSheet = { sheet, loadedAt: Date.now() };
     return sheet;
@@ -402,7 +428,7 @@ export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; me
         // колонками по заголовку (уже загружен в getProductionSheet), а не по
         // фиксированной позиции.
         const sheet = await getProductionSheet();
-        const rows = await sheet.getRows();
+        const rows = await withRetry429(() => sheet.getRows(), 'sheet.getRows');
 
         const rowByHeader: Record<string, string | number> = {};
         for (const header of sheet.headerValues) {
@@ -419,12 +445,12 @@ export async function syncLeadToSheet(leadId: string): Promise<{ ok: boolean; me
                 for (const [header, value] of Object.entries(rowByHeader)) {
                     f.set(header, value);
                 }
-                await f.save();
+                await withRetry429(() => f.save(), 'row.save');
             }
         }
 
         if (!isExist) {
-            const addRow = await sheet.addRow(rowByHeader);
+            const addRow = await withRetry429(() => sheet.addRow(rowByHeader), 'sheet.addRow');
             return addRow
                 ? { ok: true, message: 'Успех' }
                 : { ok: false, message: 'Не успех' };
